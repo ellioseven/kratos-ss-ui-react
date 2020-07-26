@@ -1,173 +1,105 @@
 import React, { useEffect, useState } from "react"
+import { LoginRequest, PublicApi, RegistrationRequest, Session } from "@oryd/kratos-client"
 import "./App.css"
 import config from "./config"
-import { PublicApi } from "@oryd/kratos-client"
 
 const kratos = new PublicApi(config.kratos.public)
 
 interface AuthHandlerOpts {
   type: "login" | "registration";
-
-  setRequestResponse: any;
+  setRequestResponse: Function;
 }
 
-
-const retry = ({ type } : { type: String }) => {
-  const location = `${config.kratos.browser}/self-service/browser/flows/${type}`
-  window.location.href = location
+const FORM_LABELS: { [key: string]: string } = {
+  "traits.email": "Email",
+  identifier: "Email",
+  password: "Password"
 }
 
-const authHandler = ({type, setRequestResponse}: AuthHandlerOpts) => {
+const redirectToFlow = ({ type }: { type: String }) => {
+  window.location.href = `${ config.kratos.browser }/self-service/browser/flows/${ type }`
+}
+
+const authHandler = ({ type, setRequestResponse }: AuthHandlerOpts): (LoginRequest | RegistrationRequest | void) => {
   const params = new URLSearchParams(window.location.search)
   const request = params.get("request") || ""
-
-  if (!request) return retry({ type })
-
+  if (!request) return redirectToFlow({ type })
   const authRequest = type === "login"
     ? kratos.getSelfServiceBrowserLoginRequest(request)
     : kratos.getSelfServiceBrowserRegistrationRequest(request)
-
-  authRequest.then(({body, response}) => {
-    if (response.statusCode !== 200) if (!request) return retry({ type })
+  authRequest.then(({ body, response }) => {
+    if (response.statusCode !== 200) if (!request) return redirectToFlow({ type })
     setRequestResponse(body)
   }).catch(error => {
     console.log(error)
-    retry({ type })
+    return redirectToFlow({ type })
   })
 }
 
-const Register = () => {
-  const [requestResponse, setRequestResponse] = useState({
-    methods: {
-      password: {
-        config: {
-          action: "",
-          fields: [],
-          messages: []
-        }
-      }
-    }
-  })
+const Auth = ({ type }: ({ type: "login" | "registration" })) => {
+  const [requestResponse, setRequestResponse] = useState<LoginRequest | RegistrationRequest>()
 
   useEffect(() => {
-    authHandler({
-      type: "registration",
-      setRequestResponse
-    })
+    authHandler({ type, setRequestResponse })
   }, [])
 
-  const {action, fields = [], messages = []} = requestResponse?.methods?.password?.config
+  // @todo Check for `oidc` method.
+  const config = requestResponse?.methods?.password?.config
 
-  const labels = {
-    "traits.email": "Email",
-    password: "Passwords"
-  }
+  if (!config) return null
 
-  const fieldDisplay = fields.map(({name, type, required, value, messages = []}) => {
-    const _required = required ? {required} : {}
+  const { action, fields = [], messages = [] } = config
+
+  // @todo Sort by property position.
+  const fieldDisplay = fields.map(({ name, type, required, value, messages = [] }) => {
+    const _required = required ? { required } : {}
     return (
-      <React.Fragment key={name}>
-        <p><label>{labels[name]}</label></p>
-        <input type={type} name={name} defaultValue={value} {..._required} />
-        <p>{messages.map(({text}) => text)}</p>
+      <React.Fragment key={ name }>
+        { FORM_LABELS[name] && <p><label>{ FORM_LABELS[name] }</label></p> }
+        <input type={ type } name={ name } defaultValue={ value as any } { ..._required } />
+        <p>{ messages.map(({ text }) => text) }</p>
       </React.Fragment>
     )
   })
 
   return (
     <React.Fragment>
-      {messages.map(({text}) => text)}
-      {action &&
-      <form action={action} style={{margin: "60px 0"}} method="POST">
-        {fieldDisplay}
-        <input type="submit" value="Register"/>
-      </form>}
-    </React.Fragment>
-  )
-}
-
-const Login = () => {
-  const [requestResponse, setRequestResponse] = useState({
-    methods: {
-      password: {
-        config: {
-          action: "",
-          fields: [],
-          messages: []
-        }
-      }
-    }
-  })
-
-  useEffect(() => {
-    authHandler({
-      type: "login",
-      setRequestResponse
-    })
-  }, [])
-
-  const {action, fields = [], messages = []} = requestResponse?.methods?.password?.config
-
-  const labels = {
-    identifier: "Email",
-    password: "Password"
-  }
-
-  const fieldDisplay = fields.map(({name, type, required, value}) => {
-    const _required = required ? {required} : {}
-    return (
-      <React.Fragment key={name}>
-        <label>{labels[name]}</label>
-        <input type={type} name={name} defaultValue={value} {..._required} />
-      </React.Fragment>
-    )
-  })
-
-  return (
-    <React.Fragment>
-      <a href="/auth/registration">Register</a>
-      <p>{messages.map(({text}) => text)}</p>
-      {action &&
-      <form action={action} style={{margin: "60px 0"}} method="POST">
-        {fieldDisplay}
-        <input type="submit" value="Login"/>
-      </form>}
+      { type === "registration" && <a href="/auth/login">Login</a> }
+      { type === "login" && <a href="/auth/registration">Register</a> }
+      { messages.map(({ text }) => <p key={ text }>{ text }</p>) }
+      { action &&
+        <form action={ action } style={ { margin: "60px 0" } } method="POST">
+          { fieldDisplay }
+          <input type="submit" value="Register"/>
+        </form> }
     </React.Fragment>
   )
 }
 
 const Profile = () => {
-  const [profile, setProfile] = useState({
-    identity: {
-      traits: {}
-    }
-  })
+  const [profile, setProfile] = useState<Session>()
 
   useEffect(() => {
-    const endpoint = "/.ory/kratos/public/sessions/whoami"
-    const headers = {"Accept": "application/json"}
-    fetch(endpoint, {method: "GET", headers})
-      .then(r => r.json())
-      .then((body) => setProfile(body))
+    kratos.whoami()
+      .then(({ body }) => setProfile(body))
   }, [])
 
-  const display = profile?.identity?.traits
+  const display = profile?.identity?.traits || {}
 
   return (
-    <pre style={{textAlign: "left"}}>
-      {JSON.stringify(display, null, "\t")}
+    <pre style={ { textAlign: "left" } }>
+      { JSON.stringify(display, null, "\t") }
     </pre>
   )
 }
 
 function App() {
-  const {pathname} = window.location
-  console.log(pathname)
+  const { pathname } = window.location
   return (
     <div className="App">
-      {pathname === "/" && <Profile/>}
-      {pathname === "/auth/login" && <Login/>}
-      {pathname === "/auth/registration" && <Register/>}
+      { pathname === "/" && <Profile/> }
+      { pathname === "/auth/login" && <Auth type="login" /> }
+      { pathname === "/auth/registration" && <Auth type="registration" /> }
     </div>
   )
 }
