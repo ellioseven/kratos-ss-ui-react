@@ -108,6 +108,7 @@ const Profile = () => {
   useEffect(() => {
     kratos.whoami()
       .then(({ body }) => setProfile(body))
+      .catch(error => console.log(error))
   }, [])
 
   const display = profile?.identity?.traits || {}
