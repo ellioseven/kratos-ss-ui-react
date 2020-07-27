@@ -49,8 +49,7 @@ const LSK_IS_AUTHENTICATED = "isAuthenticated"
 const LSK_IS_AUTHENTICATED_REFERER = "isAuthenticated.referer"
 
 const IdentityContext = createContext({
-  identity: initialIdentity,
-  setIdentity: (identity: Identity) => {}
+  identity: initialIdentity
 })
 
 const useIdentity = () => useContext(IdentityContext)
@@ -82,12 +81,7 @@ const IdentityProvider: React.FunctionComponent = ({ children }) => {
       })
   }, [])
 
-  const context = {
-    identity,
-    setIdentity: useCallback((identity: Identity) => {
-      setIdentity(identity)
-    }, [])
-  }
+  const context = { identity }
 
   return (
     <IdentityContext.Provider value={ context }>
