@@ -20,6 +20,7 @@ const redirectToFlow = ({ type }: { type: String }) => {
   window.location.href = `${ config.kratos.browser }/self-service/browser/flows/${ type }`
 }
 
+// @todo Return promise instead of using state handler.
 const authHandler = ({ type, setRequestResponse }: AuthHandlerOpts): (LoginRequest | RegistrationRequest | void) => {
   const params = new URLSearchParams(window.location.search)
   const request = params.get("request") || ""
