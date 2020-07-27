@@ -70,13 +70,13 @@ const Auth = ({ type }: ({ type: "login" | "registration" })) => {
 
   const { action, fields = [], messages = [] } = config
 
+  // Fields need to be sorted by priority.
   const fieldsSorted = fields.sort((current, next) => {
     const c = FORM_LABELS[current.name]?.priority || 0
     const n = FORM_LABELS[next.name]?.priority || 0
     return n - c
   })
 
-  // @todo Sort by property position.
   const fieldDisplay = fieldsSorted.map(({ name, type, required, value, messages = [] }) => {
     const _required = required ? { required } : {}
     return (
