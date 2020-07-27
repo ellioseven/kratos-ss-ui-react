@@ -2,6 +2,7 @@
 // @todo Profile
 // @todo Clean up config
 // @todo Merge auth/identity
+// @todo Refresh session.
 
 import React, { useEffect, useState, useContext, createContext } from "react"
 import { Identity, LoginRequest, PublicApi, RegistrationRequest } from "@oryd/kratos-client"
@@ -89,7 +90,6 @@ const setAuthenticated = () => localStorage.setItem(LSK_IS_AUTHENTICATED, "true"
 
 const unsetAuthenticated = () => localStorage.removeItem(LSK_IS_AUTHENTICATED)
 
-// @todo Refresh session.
 const IdentityProvider: React.FunctionComponent = ({ children }) => {
   const [identity, setIdentity] = useState(initialIdentity)
 
@@ -170,7 +170,6 @@ const Auth = ({ type }: ({ type: "login" | "registration" })) => {
       .catch(error => console.log(error))
   }, [type])
 
-  // @todo Check for `oidc` method.
   const config = requestResponse?.methods?.password?.config
 
   if (!config) return null
