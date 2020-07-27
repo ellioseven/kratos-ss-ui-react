@@ -1,6 +1,7 @@
 // @todo Verify
 // @todo Profile
 // @todo Clean up config
+// @todo Merge auth/identity
 
 import React, { useEffect, useState, useContext, createContext } from "react"
 import { Identity, LoginRequest, PublicApi, RegistrationRequest } from "@oryd/kratos-client"
