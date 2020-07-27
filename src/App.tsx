@@ -58,9 +58,13 @@ const Auth = ({ type }: ({ type: "login" | "registration" })) => {
   const [requestResponse, setRequestResponse] = useState<LoginRequest | RegistrationRequest>()
 
   useEffect(() => {
-    authHandler({ type })
-      .then(request => setRequestResponse(request))
-      .catch(error => console.log(error))
+    if (type === "login") {
+      kratos.initializeSelfServiceBrowserLoginFlow(true)
+        .catch(error => console.log(error))
+    }
+    // authHandler({ type })
+    //   .then(request => setRequestResponse(request))
+    //   .catch(error => console.log(error))
   }, [type])
 
   // @todo Check for `oidc` method.
