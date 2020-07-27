@@ -1,3 +1,11 @@
+nav {
+  padding: 20px;
+}
+
+nav a {
+  margin: 0 20px;
+}
+
 .App {
   text-align: center;
 }

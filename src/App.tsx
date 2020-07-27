@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useContext, createContext } from "react"
 import { Identity, LoginRequest, PublicApi, RegistrationRequest, Session } from "@oryd/kratos-client"
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
 import "./App.css"
 import config from "./config"
 
@@ -55,12 +56,9 @@ const IdentityProvider: React.FunctionComponent = ({ children }) => {
   const [session, setSession] = useState<Session>()
 
   useEffect(() => {
-    isAuthenticated() && kratos.whoami()
+    kratos.whoami()
       .then(({ body }) => setSession(body))
-      .catch(error => {
-        console.log(error)
-        unsetAuthenticated()
-      })
+      .catch(error => {})
   }, [])
 
   const identity = session?.identity || initialIdentity
@@ -89,16 +87,21 @@ const authHandler = ({ type  }: { type: "login" | "registration" }) : Promise<Lo
       : kratos.getSelfServiceBrowserRegistrationRequest(request)
 
     authRequest.then(({ body, response }) => {
-      if (response.statusCode !== 200) reject(body)
-      setAuthenticated()
+      if (response.statusCode !== 200) return reject(body)
       resolve(body)
     }).catch(error => {
       console.log(error)
-      unsetAuthenticated()
       return redirectToFlow({ type })
     })
   })
 }
+
+const AuthMenu = () => (
+  <nav>
+    <Link to="/auth/registration">Register</Link>
+    <Link to="/auth/login">Login</Link>
+  </nav>
+)
 
 const Auth = ({ type }: ({ type: "login" | "registration" })) => {
   const [requestResponse, setRequestResponse] = useState<LoginRequest | RegistrationRequest>()
@@ -106,10 +109,7 @@ const Auth = ({ type }: ({ type: "login" | "registration" })) => {
   useEffect(() => {
     authHandler({ type })
       .then(request => setRequestResponse(request))
-      .catch(error => {
-        console.log(error)
-        unsetAuthenticated()
-      })
+      .catch(error => console.log(error))
   }, [type])
 
   // @todo Check for `oidc` method.
@@ -139,8 +139,7 @@ const Auth = ({ type }: ({ type: "login" | "registration" })) => {
 
   return (
     <React.Fragment>
-      { type === "registration" && <a href="/auth/login">Login</a> }
-      { type === "login" && <a href="/auth/registration">Register</a> }
+      <AuthMenu />
       { messages.map(({ text }) => <p key={ text }>{ text }</p>) }
       { action &&
         <form action={ action } style={ { margin: "60px 0" } } method="POST">
@@ -155,21 +154,26 @@ const Profile = () => {
   const identity = useIdentity()
 
   return (
-    <pre style={ { textAlign: "left" } }>
-      { JSON.stringify(identity.traits, null, "\t") }
-    </pre>
+    <React.Fragment>
+      <AuthMenu />
+      <pre style={ { textAlign: "left" } }>
+        { JSON.stringify(identity.traits, null, "\t") }
+      </pre>
+    </React.Fragment>
   )
 }
 
 function App() {
-  const { pathname } = window.location
-
   return (
     <div className="App">
       <IdentityProvider>
-        { pathname === "/" && <Profile/> }
-        { pathname === "/auth/login" && <Auth type="login" /> }
-        { pathname === "/auth/registration" && <Auth type="registration" /> }
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={ <Profile /> } />
+            <Route path="/auth/login" element={ <Auth type="login" /> } />
+            <Route path="/auth/registration" element={ <Auth type="registration" /> } />
+          </Routes>
+        </BrowserRouter>
       </IdentityProvider>
     </div>
   )
