@@ -5,11 +5,6 @@ import config from "./config"
 
 const kratos = new PublicApi(config.kratos.public)
 
-interface AuthHandlerOpts {
-  type: "login" | "registration";
-  setRequestResponse: Function;
-}
-
 interface FormLabel {
   label: string;
   priority: number;
@@ -38,23 +33,24 @@ const redirectToFlow = ({ type }: { type: String }) => {
   window.location.href = `${ config.kratos.browser }/self-service/browser/flows/${ type }`
 }
 
-// @todo Return promise instead of using state handler.
-const authHandler = ({ type, setRequestResponse }: AuthHandlerOpts): (LoginRequest | RegistrationRequest | void) => {
-  const params = new URLSearchParams(window.location.search)
-  const request = params.get("request") || ""
+const authHandler = ({ type  }: { type: "login" | "registration" }) : Promise<LoginRequest | RegistrationRequest> => {
+  return new Promise((resolve, reject) => {
+    const params = new URLSearchParams(window.location.search)
+    const request = params.get("request") || ""
 
-  if (!request) return redirectToFlow({ type })
+    // Ensure request exists in params.
+    if (!request) return redirectToFlow({ type })
 
-  const authRequest = type === "login"
-    ? kratos.getSelfServiceBrowserLoginRequest(request)
-    : kratos.getSelfServiceBrowserRegistrationRequest(request)
+    const authRequest = type === "login"
+      ? kratos.getSelfServiceBrowserLoginRequest(request)
+      : kratos.getSelfServiceBrowserRegistrationRequest(request)
 
-  authRequest.then(({ body, response }) => {
-    if (response.statusCode !== 200) if (!request) return redirectToFlow({ type })
-    setRequestResponse(body)
-  }).catch(error => {
-    console.log(error)
-    return redirectToFlow({ type })
+    authRequest.then(({ body, response }) => {
+      if (response.statusCode !== 200) reject(body)
+      resolve(body)
+    }).catch(error => {
+      return redirectToFlow({ type })
+    })
   })
 }
 
@@ -62,7 +58,9 @@ const Auth = ({ type }: ({ type: "login" | "registration" })) => {
   const [requestResponse, setRequestResponse] = useState<LoginRequest | RegistrationRequest>()
 
   useEffect(() => {
-    authHandler({ type, setRequestResponse })
+    authHandler({ type })
+      .then(request => setRequestResponse(request))
+      .catch(error => console.log(error))
   }, [type])
 
   // @todo Check for `oidc` method.
