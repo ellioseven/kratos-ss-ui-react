@@ -92,6 +92,8 @@ const authHandler = ({ type  }: { type: "login" | "registration" }) : Promise<Lo
       setAuthenticated()
       resolve(body)
     }).catch(error => {
+      console.log(error)
+      unsetAuthenticated()
       return redirectToFlow({ type })
     })
   })
@@ -150,7 +152,7 @@ const Auth = ({ type }: ({ type: "login" | "registration" })) => {
 
 const Profile = () => {
   const identity = useIdentity()
-  
+
   return (
     <pre style={ { textAlign: "left" } }>
       { JSON.stringify(identity.traits, null, "\t") }
