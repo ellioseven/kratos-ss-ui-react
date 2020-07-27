@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react"
-import { LoginRequest, PublicApi, RegistrationRequest, Session } from "@oryd/kratos-client"
+import React, { useEffect, useState, useContext, createContext } from "react"
+import { Identity, LoginRequest, PublicApi, RegistrationRequest, Session } from "@oryd/kratos-client"
 import "./App.css"
 import config from "./config"
 
@@ -29,6 +29,48 @@ const FORM_LABELS: { [key: string]: FormLabel } = {
   }
 }
 
+const initialIdentity: Identity = {
+  id: "",
+  schemaId: "",
+  schemaUrl: "",
+  traits: {},
+  verifiableAddresses: [],
+  recoveryAddresses: []
+}
+
+const LSK_IS_AUTHENTICATED = "isAuthenticated"
+
+const IdentityContext = createContext(initialIdentity)
+
+const useIdentity = () => useContext(IdentityContext)
+
+const isAuthenticated = () => localStorage.getItem(LSK_IS_AUTHENTICATED) === "true"
+
+const setAuthenticated = () => localStorage.setItem(LSK_IS_AUTHENTICATED, "true")
+
+const unsetAuthenticated = () => localStorage.removeItem(LSK_IS_AUTHENTICATED)
+
+const IdentityProvider: React.FunctionComponent = ({ children }) => {
+  const [session, setSession] = useState<Session>()
+
+  useEffect(() => {
+    isAuthenticated() && kratos.whoami()
+      .then(({ body }) => setSession(body))
+      .catch(error => {
+        console.log(error)
+        unsetAuthenticated()
+      })
+  }, [])
+
+  const identity = session?.identity || initialIdentity
+
+  return (
+    <IdentityContext.Provider value={ identity }>
+      { children }
+    </IdentityContext.Provider>
+  )
+}
+
 const redirectToFlow = ({ type }: { type: String }) => {
   window.location.href = `${ config.kratos.browser }/self-service/browser/flows/${ type }`
 }
@@ -47,6 +89,7 @@ const authHandler = ({ type  }: { type: "login" | "registration" }) : Promise<Lo
 
     authRequest.then(({ body, response }) => {
       if (response.statusCode !== 200) reject(body)
+      setAuthenticated()
       resolve(body)
     }).catch(error => {
       return redirectToFlow({ type })
@@ -60,7 +103,10 @@ const Auth = ({ type }: ({ type: "login" | "registration" })) => {
   useEffect(() => {
     authHandler({ type })
       .then(request => setRequestResponse(request))
-      .catch(error => console.log(error))
+      .catch(error => {
+        console.log(error)
+        unsetAuthenticated()
+      })
   }, [type])
 
   // @todo Check for `oidc` method.
@@ -103,30 +149,25 @@ const Auth = ({ type }: ({ type: "login" | "registration" })) => {
 }
 
 const Profile = () => {
-  const [profile, setProfile] = useState<Session>()
-
-  useEffect(() => {
-    kratos.whoami()
-      .then(({ body }) => setProfile(body))
-      .catch(error => console.log(error))
-  }, [])
-
-  const display = profile?.identity?.traits || {}
-
+  const identity = useIdentity()
+  
   return (
     <pre style={ { textAlign: "left" } }>
-      { JSON.stringify(display, null, "\t") }
+      { JSON.stringify(identity.traits, null, "\t") }
     </pre>
   )
 }
 
 function App() {
   const { pathname } = window.location
+
   return (
     <div className="App">
-      { pathname === "/" && <Profile/> }
-      { pathname === "/auth/login" && <Auth type="login" /> }
-      { pathname === "/auth/registration" && <Auth type="registration" /> }
+      <IdentityProvider>
+        { pathname === "/" && <Profile/> }
+        { pathname === "/auth/login" && <Auth type="login" /> }
+        { pathname === "/auth/registration" && <Auth type="registration" /> }
+      </IdentityProvider>
     </div>
   )
 }
