@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useContext, createContext, useCallback } from "react"
+import React, { useEffect, useState, useContext, createContext } from "react"
 import { Identity, LoginRequest, PublicApi, RegistrationRequest } from "@oryd/kratos-client"
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom"
 import "./App.css"
 import config from "./config"
 
@@ -30,9 +30,21 @@ const FORM_LABELS: { [key: string]: FormLabel } = {
   }
 }
 
-interface IdentityContext {
-  identity: Identity;
-  setIdentity: Function;
+const useAuth = () => {
+  const navigate = useNavigate()
+  const { pathname } = window.location
+
+  const login = () => {
+    navigate("/auth/login")
+    setAuthenticatedReferer(pathname)
+  }
+
+  const register = () => {
+    navigate("/auth/registration")
+    setAuthenticatedReferer(pathname)
+  }
+
+  return { login, register }
 }
 
 const initialIdentity: Identity = {
@@ -118,12 +130,13 @@ const authHandler = ({ type  }: { type: "login" | "registration" }) : Promise<Lo
 
 // @todo Logout.
 const AuthMenu = () => {
+  const { login, register } = useAuth()
   if (isAuthenticated()) return null
   return (
-    <nav>
-      <Link to="/auth/registration">Register</Link>
-      <Link to="/auth/login">Login</Link>
-    </nav>
+    <div className="auth-menu">
+      <button onClick={ login }>Login</button>
+      <button onClick={ register }>Register</button>
+    </div>
   )
 }
 
@@ -175,20 +188,20 @@ const Auth = ({ type }: ({ type: "login" | "registration" })) => {
 }
 
 const Callback = () => {
-  const returnLocation = getAuthenticatedReferer()
+  const returnLocation = getAuthenticatedReferer() || "/"
 
   useEffect(() => {
     kratos.whoami()
       .then(({ body }) => {
         setAuthenticated()
         unsetAuthenticatedReferer()
-        window.location.href = returnLocation || "/"
+        window.location.href = returnLocation
       })
       .catch(error => {
         unsetAuthenticated()
         console.log(error)
       })
-  }, [])
+  }, [returnLocation])
 
   return null
 }
