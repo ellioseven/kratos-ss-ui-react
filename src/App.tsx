@@ -50,6 +50,7 @@ const setAuthenticated = () => localStorage.setItem(LSK_IS_AUTHENTICATED, "true"
 
 const unsetAuthenticated = () => localStorage.removeItem(LSK_IS_AUTHENTICATED)
 
+// @todo Refresh session.
 const IdentityProvider: React.FunctionComponent = ({ children }) => {
   const [session, setSession] = useState<Session>()
 
