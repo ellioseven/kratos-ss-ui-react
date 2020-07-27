@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useContext, createContext } from "react"
-import { Identity, LoginRequest, PublicApi, RegistrationRequest, Session } from "@oryd/kratos-client"
+import React, { useEffect, useState, useContext, createContext, useCallback } from "react"
+import { Identity, LoginRequest, PublicApi, RegistrationRequest } from "@oryd/kratos-client"
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
 import "./App.css"
 import config from "./config"
@@ -30,6 +30,11 @@ const FORM_LABELS: { [key: string]: FormLabel } = {
   }
 }
 
+interface IdentityContext {
+  identity: Identity;
+  setIdentity: Function;
+}
+
 const initialIdentity: Identity = {
   id: "",
   schemaId: "",
@@ -41,9 +46,20 @@ const initialIdentity: Identity = {
 
 const LSK_IS_AUTHENTICATED = "isAuthenticated"
 
-const IdentityContext = createContext(initialIdentity)
+const LSK_IS_AUTHENTICATED_REFERER = "isAuthenticated.referer"
+
+const IdentityContext = createContext({
+  identity: initialIdentity,
+  setIdentity: (identity: Identity) => {}
+})
 
 const useIdentity = () => useContext(IdentityContext)
+
+const getAuthenticatedReferer = () => localStorage.getItem(LSK_IS_AUTHENTICATED_REFERER)
+
+const setAuthenticatedReferer = (location: string) => localStorage.setItem(LSK_IS_AUTHENTICATED_REFERER, location)
+
+const unsetAuthenticatedReferer = () => localStorage.removeItem(LSK_IS_AUTHENTICATED_REFERER)
 
 const isAuthenticated = () => localStorage.getItem(LSK_IS_AUTHENTICATED) === "true"
 
@@ -53,25 +69,35 @@ const unsetAuthenticated = () => localStorage.removeItem(LSK_IS_AUTHENTICATED)
 
 // @todo Refresh session.
 const IdentityProvider: React.FunctionComponent = ({ children }) => {
-  const [session, setSession] = useState<Session>()
+  const [identity, setIdentity] = useState(initialIdentity)
 
   useEffect(() => {
-    kratos.whoami()
-      .then(({ body }) => setSession(body))
-      .catch(error => {})
+    isAuthenticated() && kratos.whoami()
+      .then(({ body }) => {
+        setIdentity(body.identity)
+      })
+      .catch(error => {
+        unsetAuthenticated()
+        console.log(error)
+      })
   }, [])
 
-  const identity = session?.identity || initialIdentity
+  const context = {
+    identity,
+    setIdentity: useCallback((identity: Identity) => {
+      setIdentity(identity)
+    }, [])
+  }
 
   return (
-    <IdentityContext.Provider value={ identity }>
+    <IdentityContext.Provider value={ context }>
       { children }
     </IdentityContext.Provider>
   )
 }
 
 const redirectToFlow = ({ type }: { type: String }) => {
-  window.location.href = `${ config.kratos.browser }/self-service/browser/flows/${ type }`
+  window.location.href = `${ config.kratos.browser }/self-service/browser/flows/${ type }?return_to=${config.baseUrl}/callback`
 }
 
 const authHandler = ({ type  }: { type: "login" | "registration" }) : Promise<LoginRequest | RegistrationRequest> => {
@@ -96,12 +122,16 @@ const authHandler = ({ type  }: { type: "login" | "registration" }) : Promise<Lo
   })
 }
 
-const AuthMenu = () => (
-  <nav>
-    <Link to="/auth/registration">Register</Link>
-    <Link to="/auth/login">Login</Link>
-  </nav>
-)
+// @todo Logout.
+const AuthMenu = () => {
+  if (isAuthenticated()) return null
+  return (
+    <nav>
+      <Link to="/auth/registration">Register</Link>
+      <Link to="/auth/login">Login</Link>
+    </nav>
+  )
+}
 
 const Auth = ({ type }: ({ type: "login" | "registration" })) => {
   const [requestResponse, setRequestResponse] = useState<LoginRequest | RegistrationRequest>()
@@ -150,6 +180,25 @@ const Auth = ({ type }: ({ type: "login" | "registration" })) => {
   )
 }
 
+const Callback = () => {
+  const returnLocation = getAuthenticatedReferer()
+
+  useEffect(() => {
+    kratos.whoami()
+      .then(({ body }) => {
+        setAuthenticated()
+        unsetAuthenticatedReferer()
+        window.location.href = returnLocation || "/"
+      })
+      .catch(error => {
+        unsetAuthenticated()
+        console.log(error)
+      })
+  }, [])
+
+  return null
+}
+
 const Profile = () => {
   const identity = useIdentity()
 
@@ -157,7 +206,7 @@ const Profile = () => {
     <React.Fragment>
       <AuthMenu />
       <pre style={ { textAlign: "left" } }>
-        { JSON.stringify(identity.traits, null, "\t") }
+        { JSON.stringify(identity.identity.traits, null, "\t") }
       </pre>
     </React.Fragment>
   )
@@ -170,6 +219,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={ <Profile /> } />
+            <Route path="/callback" element={ <Callback /> } />
             <Route path="/auth/login" element={ <Auth type="login" /> } />
             <Route path="/auth/registration" element={ <Auth type="registration" /> } />
           </Routes>
