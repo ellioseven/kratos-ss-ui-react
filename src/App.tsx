@@ -10,10 +10,28 @@ interface AuthHandlerOpts {
   setRequestResponse: Function;
 }
 
-const FORM_LABELS: { [key: string]: string } = {
-  "traits.email": "Email",
-  identifier: "Email",
-  password: "Password"
+interface FormLabel {
+  label: string;
+  priority: number;
+}
+
+const FORM_LABELS: { [key: string]: FormLabel } = {
+  "traits.email": {
+    label: "Email",
+    priority: 100,
+  },
+  identifier: {
+    label: "Email",
+    priority: 90
+  },
+  "to_verify": {
+    label: "Email",
+    priority: 80
+  },
+  password: {
+    label: "Password",
+    priority: 70
+  }
 }
 
 const redirectToFlow = ({ type }: { type: String }) => {
@@ -24,10 +42,13 @@ const redirectToFlow = ({ type }: { type: String }) => {
 const authHandler = ({ type, setRequestResponse }: AuthHandlerOpts): (LoginRequest | RegistrationRequest | void) => {
   const params = new URLSearchParams(window.location.search)
   const request = params.get("request") || ""
+
   if (!request) return redirectToFlow({ type })
+
   const authRequest = type === "login"
     ? kratos.getSelfServiceBrowserLoginRequest(request)
     : kratos.getSelfServiceBrowserRegistrationRequest(request)
+
   authRequest.then(({ body, response }) => {
     if (response.statusCode !== 200) if (!request) return redirectToFlow({ type })
     setRequestResponse(body)
@@ -42,7 +63,7 @@ const Auth = ({ type }: ({ type: "login" | "registration" })) => {
 
   useEffect(() => {
     authHandler({ type, setRequestResponse })
-  }, [])
+  }, [type])
 
   // @todo Check for `oidc` method.
   const config = requestResponse?.methods?.password?.config
@@ -51,12 +72,18 @@ const Auth = ({ type }: ({ type: "login" | "registration" })) => {
 
   const { action, fields = [], messages = [] } = config
 
+  const fieldsSorted = fields.sort((current, next) => {
+    const c = FORM_LABELS[current.name]?.priority || 0
+    const n = FORM_LABELS[next.name]?.priority || 0
+    return n - c
+  })
+
   // @todo Sort by property position.
-  const fieldDisplay = fields.map(({ name, type, required, value, messages = [] }) => {
+  const fieldDisplay = fieldsSorted.map(({ name, type, required, value, messages = [] }) => {
     const _required = required ? { required } : {}
     return (
       <React.Fragment key={ name }>
-        { FORM_LABELS[name] && <p><label>{ FORM_LABELS[name] }</label></p> }
+        { FORM_LABELS[name]?.label && <p><label>{ FORM_LABELS[name]?.label }</label></p> }
         <input type={ type } name={ name } defaultValue={ value as any } { ..._required } />
         <p>{ messages.map(({ text }) => text) }</p>
       </React.Fragment>
