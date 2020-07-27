@@ -138,7 +138,6 @@ const authHandler = ({ type  }: { type: "login" | "registration" }) : Promise<Lo
   })
 }
 
-// @todo Logout.
 const AuthMenu = () => {
   const { login, register, logout } = useAuth()
 
