@@ -1,3 +1,7 @@
+// @todo Verify
+// @todo Profile
+// @todo Clean up config
+
 import React, { useEffect, useState, useContext, createContext } from "react"
 import { Identity, LoginRequest, PublicApi, RegistrationRequest } from "@oryd/kratos-client"
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom"
