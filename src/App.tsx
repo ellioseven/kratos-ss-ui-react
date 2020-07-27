@@ -44,7 +44,13 @@ const useAuth = () => {
     setAuthenticatedReferer(pathname)
   }
 
-  return { login, register }
+  const logout = () => {
+    const base = config.kratos.browser
+    unsetAuthenticated()
+    window.location.href = `${base}/self-service/browser/flows/logout`
+  }
+
+  return { login, register, logout }
 }
 
 const initialIdentity: Identity = {
@@ -130,12 +136,23 @@ const authHandler = ({ type  }: { type: "login" | "registration" }) : Promise<Lo
 
 // @todo Logout.
 const AuthMenu = () => {
-  const { login, register } = useAuth()
-  if (isAuthenticated()) return null
+  const { login, register, logout } = useAuth()
+
+  let menu
+  if (isAuthenticated()) {
+    menu = <button onClick={ logout }>Logout</button>
+  } else {
+    menu = (
+      <React.Fragment>
+        <button onClick={ login }>Login</button>
+        <button onClick={ register }>Register</button>
+      </React.Fragment>
+    )
+  }
+
   return (
     <div className="auth-menu">
-      <button onClick={ login }>Login</button>
-      <button onClick={ register }>Register</button>
+      { menu }
     </div>
   )
 }
