@@ -1,7 +1,3 @@
-// @todo Error.
-// @todo Clean up config.
-// @todo Refresh session.
-
 import React from "react"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { Login } from "containers/Login"
