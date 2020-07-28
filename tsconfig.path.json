@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "components/*": ["components/*"],
+      "containers/*": ["containers/*"],
+      "services/*": ["services/*"],
+      "constants/*": ["constants/*"],
+      "config/*": ["config/*"]
+    }
+  }
+}
