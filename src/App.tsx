@@ -4,7 +4,17 @@
 // @todo Refresh session.
 
 import React, { useEffect, useState, useContext, createContext } from "react"
-import { FormField, Identity, LoginRequest, Message, PublicApi, RegistrationRequest, SettingsRequest, VerificationRequest } from "@oryd/kratos-client"
+import {
+  FormField,
+  Identity,
+  LoginRequest,
+  Message,
+  PublicApi,
+  RecoveryRequest,
+  RegistrationRequest,
+  SettingsRequest,
+  VerificationRequest
+} from "@oryd/kratos-client"
 import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom"
 import "./App.css"
 import config from "./config"
@@ -21,17 +31,21 @@ const FORM_LABELS: { [key: string]: FormLabel } = {
     label: "Email",
     priority: 100,
   },
+  email: {
+    label: "Email",
+    priority: 90
+  },
   identifier: {
     label: "Email",
     priority: 90
   },
   "to_verify": {
     label: "Email",
-    priority: 80
+    priority: 90
   },
   password: {
     label: "Password",
-    priority: 70
+    priority: 80
   }
 }
 
@@ -109,10 +123,11 @@ const endpoints = {
   login: `${ config.kratos.browser }/self-service/browser/flows/login?return_to=${config.baseUrl}/callback`,
   register: `${ config.kratos.browser }/self-service/browser/flows/registration?return_to=${config.baseUrl}/callback`,
   settings: `${ config.kratos.browser }/self-service/browser/flows/settings`,
-  verify: `${config.kratos.public}/self-service/browser/flows/verification/init/email`
+  verify: `${config.kratos.public}/self-service/browser/flows/verification/init/email`,
+  recover: `${config.kratos.public}/self-service/browser/flows/recovery`
 }
 
-const authHandler = ({ type  }: { type: "login" | "register" | "settings" | "verify"  }) : Promise<LoginRequest | RegistrationRequest | SettingsRequest | VerificationRequest> => {
+const authHandler = ({ type  }: { type: "login" | "register" | "settings" | "verify" | "recover"  }) : Promise<LoginRequest | RegistrationRequest | SettingsRequest | VerificationRequest | RecoveryRequest> => {
   return new Promise((resolve, reject) => {
     const params = new URLSearchParams(window.location.search)
     const request = params.get("request") || ""
@@ -126,6 +141,7 @@ const authHandler = ({ type  }: { type: "login" | "register" | "settings" | "ver
     else if (type === "register") authRequest = kratos.getSelfServiceBrowserRegistrationRequest(request)
     else if (type === "settings") authRequest = kratos.getSelfServiceBrowserSettingsRequest(request)
     else if (type === "verify") authRequest = kratos.getSelfServiceVerificationRequest(request)
+    else if (type === "recover") authRequest = kratos.getSelfServiceBrowserRecoveryRequest(request)
 
     if (!authRequest) return reject()
 
@@ -299,9 +315,7 @@ const Verify = () => {
       .catch(() => {})
   }, [setRequestResponse])
 
-  if (!requestResponse) return null
-
-  const { form, messages } = requestResponse
+  const { form, messages } = requestResponse || {}
 
   return (
     <React.Fragment>
@@ -315,6 +329,35 @@ const Verify = () => {
             fields={ form.fields }
             messages={ form.messages } />
         </React.Fragment> }
+    </React.Fragment>
+  )
+}
+
+const Recover = () => {
+  const [requestResponse, setRequestResponse] = useState<RecoveryRequest>()
+
+  useEffect(() => {
+    const request = authHandler({ type: "recover" }) as Promise<RecoveryRequest>
+    request
+      .then(request => setRequestResponse(request))
+      .catch(() => {})
+  }, [setRequestResponse])
+
+  console.log(requestResponse)
+  const form = requestResponse?.methods?.link?.config
+  const messages = requestResponse?.messages
+
+  return (
+    <React.Fragment>
+      <AuthMenu />
+      { messages && <KratosMessages messages={ messages } /> }
+      { form &&
+        <React.Fragment>
+          <KratosForm
+            action={ form.action }
+            fields={ form.fields }
+            messages={ form.messages } />
+      </React.Fragment> }
     </React.Fragment>
   )
 }
@@ -362,6 +405,7 @@ function App() {
             <Route path="/auth/login" element={ <Login /> } />
             <Route path="/settings" element={ <Settings /> } />
             <Route path="/verify" element={ <Verify /> } />
+            <Route path="/recovery" element={ <Recover /> } />
             <Route path="/auth/registration" element={ <Register /> } />
           </Routes>
         </BrowserRouter>
