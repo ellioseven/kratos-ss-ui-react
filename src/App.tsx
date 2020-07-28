@@ -112,8 +112,7 @@ const useAuth = () => {
   return {
     login,
     register,
-    logout,
-    initialiseRequest
+    logout
   }
 }
 
@@ -220,7 +219,6 @@ const KratosMessages = ({ messages }: { messages: Message[] }) => (
 )
 
 const Login = () => {
-  const { initialiseRequest } = useAuth()
   const [requestResponse, setRequestResponse] = useState<LoginRequest>()
 
   useEffect(() => {
@@ -247,7 +245,6 @@ const Login = () => {
 }
 
 const Register = () => {
-  const { initialiseRequest } = useAuth()
   const [requestResponse, setRequestResponse] = useState<RegistrationRequest>()
 
   useEffect(() => {
@@ -274,7 +271,6 @@ const Register = () => {
 }
 
 const Settings = () => {
-  const { initialiseRequest } = useAuth()
   const [requestResponse, setRequestResponse] = useState<SettingsRequest>()
 
   useEffect(() => {
@@ -301,7 +297,6 @@ const Settings = () => {
 }
 
 const Verify = () => {
-  const { initialiseRequest } = useAuth()
   const [requestResponse, setRequestResponse] = useState<VerificationRequest>()
 
   useEffect(() => {
@@ -330,7 +325,6 @@ const Verify = () => {
 }
 
 const Recover = () => {
-  const { initialiseRequest } = useAuth()
   const [requestResponse, setRequestResponse] = useState<RecoveryRequest>()
 
   useEffect(() => {
