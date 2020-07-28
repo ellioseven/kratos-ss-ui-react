@@ -4,17 +4,7 @@
 // @todo Refresh session.
 
 import React, { useEffect, useState, useContext, createContext } from "react"
-import {
-  FormField,
-  Identity,
-  LoginRequest,
-  Message,
-  PublicApi,
-  RecoveryRequest,
-  RegistrationRequest,
-  SettingsRequest,
-  VerificationRequest
-} from "@oryd/kratos-client"
+import { FormField, Identity, LoginRequest, Message, PublicApi, RecoveryRequest, RegistrationRequest, SettingsRequest, VerificationRequest } from "@oryd/kratos-client"
 import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom"
 import "./App.css"
 import config from "./config"
@@ -343,7 +333,6 @@ const Recover = () => {
       .catch(() => {})
   }, [setRequestResponse])
 
-  console.log(requestResponse)
   const form = requestResponse?.methods?.link?.config
   const messages = requestResponse?.messages
 
