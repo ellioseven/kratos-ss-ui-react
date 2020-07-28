@@ -1,4 +1,5 @@
-// @todo Clean up config
+// @todo Error.
+// @todo Clean up config.
 // @todo Merge auth/identity
 // @todo Refresh session.
 
@@ -230,13 +231,10 @@ const Login = () => {
       <AuthMenu />
       { messages && <KratosMessages messages={ messages } /> }
       { form &&
-        <React.Fragment>
-          <h4>Resend Verification Code</h4>
-          <KratosForm
-            action={ form.action }
-            fields={ form.fields }
-            messages={ form.messages } />
-        </React.Fragment> }
+        <KratosForm
+          action={ form.action }
+          fields={ form.fields }
+          messages={ form.messages } /> }
     </React.Fragment>
   )
 }
@@ -312,10 +310,13 @@ const Verify = () => {
       <AuthMenu />
       { messages && <KratosMessages messages={ messages } /> }
       { form &&
-        <KratosForm
-          action={ form.action }
-          fields={ form.fields }
-          messages={ form.messages }/> }
+        <React.Fragment>
+          <h4>Resend Verification Code</h4>
+          <KratosForm
+            action={ form.action }
+            fields={ form.fields }
+            messages={ form.messages } />
+        </React.Fragment> }
     </React.Fragment>
   )
 }
