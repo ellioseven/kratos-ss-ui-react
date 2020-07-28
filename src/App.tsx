@@ -1,10 +1,9 @@
 // @todo Error.
 // @todo Clean up config.
-// @todo Merge auth/identity
 // @todo Refresh session.
 
 import React, { useEffect, useState, useContext, createContext } from "react"
-import { FormField, Identity, LoginRequest, Message, PublicApi, RecoveryRequest, RegistrationRequest, SettingsRequest, VerificationRequest } from "@oryd/kratos-client"
+import { FormField, LoginRequest, Message, PublicApi, RecoveryRequest, RegistrationRequest, Session, SettingsRequest, VerificationRequest } from "@oryd/kratos-client"
 import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom"
 import "./App.css"
 import config from "./config"
@@ -47,7 +46,7 @@ const initialiseRequest = ({ type  }: { type: "login" | "register" | "settings" 
     verify: `${config.kratos.public}/self-service/browser/flows/verification/init/email`,
     recover: `${config.kratos.public}/self-service/browser/flows/recovery`
   }
-  
+
   return new Promise((resolve, reject) => {
     const params = new URLSearchParams(window.location.search)
     const request = params.get("request") || ""
@@ -73,6 +72,10 @@ const initialiseRequest = ({ type  }: { type: "login" | "register" | "settings" 
     })
   })
 }
+
+const LSK_IS_AUTHENTICATED = "isAuthenticated"
+
+const LSK_IS_AUTHENTICATED_REFERER = "isAuthenticated.referer"
 
 const getAuthenticatedReferer = () => localStorage.getItem(LSK_IS_AUTHENTICATED_REFERER)
 
@@ -114,25 +117,21 @@ const useAuth = () => {
   }
 }
 
-const initialIdentity: Identity = new Identity()
+const SessionContext = createContext(
+  new Session()
+)
 
-const LSK_IS_AUTHENTICATED = "isAuthenticated"
+const useSession = () => useContext(SessionContext)
 
-const LSK_IS_AUTHENTICATED_REFERER = "isAuthenticated.referer"
-
-const IdentityContext = createContext({
-  identity: initialIdentity
-})
-
-const useIdentity = () => useContext(IdentityContext)
-
-const IdentityProvider: React.FunctionComponent = ({ children }) => {
-  const [identity, setIdentity] = useState(initialIdentity)
+const SessionProvider: React.FunctionComponent = ({ children }) => {
+  const [session, setSession] = useState(
+    new Session()
+  )
 
   useEffect(() => {
     isAuthenticated() && kratos.whoami()
       .then(({ body }) => {
-        setIdentity(body.identity)
+        setSession(body)
       })
       .catch(error => {
         unsetAuthenticated()
@@ -140,12 +139,10 @@ const IdentityProvider: React.FunctionComponent = ({ children }) => {
       })
   }, [])
 
-  const context = { identity }
-
   return (
-    <IdentityContext.Provider value={ context }>
+    <SessionContext.Provider value={ session }>
       { children }
-    </IdentityContext.Provider>
+    </SessionContext.Provider>
   )
 }
 
@@ -223,6 +220,7 @@ const KratosMessages = ({ messages }: { messages: Message[] }) => (
 )
 
 const Login = () => {
+  const { initialiseRequest } = useAuth()
   const [requestResponse, setRequestResponse] = useState<LoginRequest>()
 
   useEffect(() => {
@@ -249,6 +247,7 @@ const Login = () => {
 }
 
 const Register = () => {
+  const { initialiseRequest } = useAuth()
   const [requestResponse, setRequestResponse] = useState<RegistrationRequest>()
 
   useEffect(() => {
@@ -275,6 +274,7 @@ const Register = () => {
 }
 
 const Settings = () => {
+  const { initialiseRequest } = useAuth()
   const [requestResponse, setRequestResponse] = useState<SettingsRequest>()
 
   useEffect(() => {
@@ -301,6 +301,7 @@ const Settings = () => {
 }
 
 const Verify = () => {
+  const { initialiseRequest } = useAuth()
   const [requestResponse, setRequestResponse] = useState<VerificationRequest>()
 
   useEffect(() => {
@@ -329,6 +330,7 @@ const Verify = () => {
 }
 
 const Recover = () => {
+  const { initialiseRequest } = useAuth()
   const [requestResponse, setRequestResponse] = useState<RecoveryRequest>()
 
   useEffect(() => {
@@ -361,7 +363,7 @@ const Callback = () => {
 
   useEffect(() => {
     kratos.whoami()
-      .then(({ body }) => {
+      .then(() => {
         setAuthenticated()
         unsetAuthenticatedReferer()
         window.location.href = returnLocation
@@ -376,13 +378,14 @@ const Callback = () => {
 }
 
 const Dashboard = () => {
-  const identity = useIdentity()
+  const session = useSession()
+  const user = session.identity?.traits || {}
 
   return (
     <React.Fragment>
       <AuthMenu />
       <pre style={ { textAlign: "left" } }>
-        { JSON.stringify(identity.identity.traits, null, "\t") }
+        { JSON.stringify(user, null, "\t") }
       </pre>
     </React.Fragment>
   )
@@ -391,7 +394,7 @@ const Dashboard = () => {
 function App() {
   return (
     <div className="App">
-      <IdentityProvider>
+      <SessionProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={ <Dashboard /> } />
@@ -403,7 +406,7 @@ function App() {
             <Route path="/auth/registration" element={ <Register /> } />
           </Routes>
         </BrowserRouter>
-      </IdentityProvider>
+      </SessionProvider>
     </div>
   )
 }
