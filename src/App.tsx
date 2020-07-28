@@ -235,7 +235,7 @@ const Callback = () => {
   return null
 }
 
-const Profile = () => {
+const Dashboard = () => {
   const identity = useIdentity()
 
   return (
@@ -254,7 +254,7 @@ function App() {
       <IdentityProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={ <Profile /> } />
+            <Route path="/" element={ <Dashboard /> } />
             <Route path="/callback" element={ <Callback /> } />
             <Route path="/auth/login" element={ <Auth type="login" /> } />
             <Route path="/settings" element={ <Auth type="settings" /> } />
