@@ -130,11 +130,9 @@ const authHandler = ({ type  }: { type: "login" | "register" | "settings" | "ver
     if (!authRequest) return reject()
 
     authRequest.then(({ body, response }) => {
-      console.log(body, response)
       if (response.statusCode !== 200) return reject(body)
       resolve(body)
     }).catch(error => {
-      console.log(error)
       return window.location.href = endpoint
     })
   })
@@ -220,7 +218,7 @@ const Login = () => {
     const request = authHandler({ type: "login" }) as Promise<LoginRequest>
     request
       .then(request => setRequestResponse(request))
-      .catch(error => console.log(error))
+      .catch(() => {})
   }, [setRequestResponse])
 
   const messages = requestResponse?.messages
@@ -246,7 +244,7 @@ const Register = () => {
     const request = authHandler({ type: "register" }) as Promise<RegistrationRequest>
     request
       .then(request => setRequestResponse(request))
-      .catch(error => console.log(error))
+      .catch(() => {})
   }, [setRequestResponse])
 
   const form = requestResponse?.methods?.password?.config
@@ -272,7 +270,7 @@ const Settings = () => {
     const request = authHandler({ type: "settings" }) as Promise<SettingsRequest>
     request
       .then(request => setRequestResponse(request))
-      .catch(error => console.log(error))
+      .catch(() => {})
   }, [setRequestResponse])
 
   const form = requestResponse?.methods?.password?.config
@@ -298,7 +296,7 @@ const Verify = () => {
     const request = authHandler({ type: "verify" }) as Promise<VerificationRequest>
     request
       .then(request => setRequestResponse(request))
-      .catch(error => console.log(error))
+      .catch(() => {})
   }, [setRequestResponse])
 
   if (!requestResponse) return null
