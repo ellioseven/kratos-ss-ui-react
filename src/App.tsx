@@ -171,7 +171,7 @@ const AuthMenu = () => {
   )
 }
 
-const sortFields = ({ fields }: { fields: FormField[]}) => {
+const sortFormFields = ({ fields }: { fields: FormField[]}) => {
   return fields.sort((current, next) => {
     const c = FORM_LABELS[current.name]?.priority || 0
     const n = FORM_LABELS[next.name]?.priority || 0
@@ -180,7 +180,7 @@ const sortFields = ({ fields }: { fields: FormField[]}) => {
 }
 
 const KratosForm = ({ action, messages = [], fields }: { action: string, messages?: Message[], fields: FormField[] }) => {
-  const fieldsSorted = sortFields({ fields })
+  const fieldsSorted = sortFormFields({ fields })
   return (
     <React.Fragment>
       { messages.map(({ text }) => <p key={ text }>{ text }</p>) }
