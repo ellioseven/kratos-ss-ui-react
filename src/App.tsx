@@ -5,8 +5,8 @@
 // @todo Refresh session.
 
 import React, { useEffect, useState, useContext, createContext } from "react"
-import { Identity, LoginRequest, PublicApi, RegistrationRequest } from "@oryd/kratos-client"
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom"
+import { Identity, LoginRequest, PublicApi, RegistrationRequest, SettingsRequest } from "@oryd/kratos-client"
+import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom"
 import "./App.css"
 import config from "./config"
 
@@ -113,11 +113,11 @@ const IdentityProvider: React.FunctionComponent = ({ children }) => {
   )
 }
 
-const redirectToFlow = ({ type }: { type: String }) => {
+const redirectToFlow = ({ type }: { type: string }) => {
   window.location.href = `${ config.kratos.browser }/self-service/browser/flows/${ type }?return_to=${config.baseUrl}/callback`
 }
 
-const authHandler = ({ type  }: { type: "login" | "registration" }) : Promise<LoginRequest | RegistrationRequest> => {
+const authHandler = ({ type  }: { type: "login" | "registration" | "settings" }) : Promise<LoginRequest | RegistrationRequest | SettingsRequest> => {
   return new Promise((resolve, reject) => {
     const params = new URLSearchParams(window.location.search)
     const request = params.get("request") || ""
@@ -125,11 +125,15 @@ const authHandler = ({ type  }: { type: "login" | "registration" }) : Promise<Lo
     // Ensure request exists in params.
     if (!request) return redirectToFlow({ type })
 
-    const authRequest = type === "login"
-      ? kratos.getSelfServiceBrowserLoginRequest(request)
-      : kratos.getSelfServiceBrowserRegistrationRequest(request)
+    let authRequest: Promise<any> | undefined
+    if (type === "login") authRequest = kratos.getSelfServiceBrowserLoginRequest(request)
+    else if (type === "registration") authRequest = kratos.getSelfServiceBrowserRegistrationRequest(request)
+    else if (type === "settings") authRequest = kratos.getSelfServiceBrowserSettingsRequest(request)
+
+    if (!authRequest) return reject()
 
     authRequest.then(({ body, response }) => {
+      console.log(body, response)
       if (response.statusCode !== 200) return reject(body)
       resolve(body)
     }).catch(error => {
@@ -144,7 +148,12 @@ const AuthMenu = () => {
 
   let menu
   if (isAuthenticated()) {
-    menu = <button onClick={ logout }>Logout</button>
+    menu = (
+      <React.Fragment>
+        <Link to="/settings">Settings</Link>
+        <button onClick={ logout }>Logout</button>
+      </React.Fragment>
+    )
   } else {
     menu = (
       <React.Fragment>
@@ -161,8 +170,8 @@ const AuthMenu = () => {
   )
 }
 
-const Auth = ({ type }: ({ type: "login" | "registration" })) => {
-  const [requestResponse, setRequestResponse] = useState<LoginRequest | RegistrationRequest>()
+const Auth = ({ type }: ({ type: "login" | "registration" | "settings" })) => {
+  const [requestResponse, setRequestResponse] = useState<LoginRequest | RegistrationRequest | SettingsRequest>()
 
   useEffect(() => {
     authHandler({ type })
@@ -248,6 +257,7 @@ function App() {
             <Route path="/" element={ <Profile /> } />
             <Route path="/callback" element={ <Callback /> } />
             <Route path="/auth/login" element={ <Auth type="login" /> } />
+            <Route path="/settings" element={ <Auth type="settings" /> } />
             <Route path="/auth/registration" element={ <Auth type="registration" /> } />
           </Routes>
         </BrowserRouter>

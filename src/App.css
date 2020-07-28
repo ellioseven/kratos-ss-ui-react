@@ -1,3 +1,17 @@
+a {
+  color: #08c;
+}
+
+.auth-menu button {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: #08c;
+  cursor: pointer;
+  font-size: inherit;
+  text-decoration: underline;
+}
+
 .App {
   text-align: center;
 }
