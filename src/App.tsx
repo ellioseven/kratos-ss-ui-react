@@ -58,14 +58,7 @@ const useAuth = () => {
   return { login, register, logout }
 }
 
-const initialIdentity: Identity = {
-  id: "",
-  schemaId: "",
-  schemaUrl: "",
-  traits: {},
-  verifiableAddresses: [],
-  recoveryAddresses: []
-}
+const initialIdentity: Identity = new Identity()
 
 const LSK_IS_AUTHENTICATED = "isAuthenticated"
 
