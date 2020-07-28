@@ -4,7 +4,15 @@
 // @todo Refresh session.
 
 import React, { useEffect, useState, useContext, createContext } from "react"
-import { Identity, LoginRequest, PublicApi, RegistrationRequest, SettingsRequest } from "@oryd/kratos-client"
+import {
+  Form,
+  FormField,
+  Identity,
+  LoginRequest, Message,
+  PublicApi,
+  RegistrationRequest,
+  SettingsRequest
+} from "@oryd/kratos-client"
 import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom"
 import "./App.css"
 import config from "./config"
@@ -105,21 +113,24 @@ const IdentityProvider: React.FunctionComponent = ({ children }) => {
   )
 }
 
-const redirectToFlow = ({ type }: { type: string }) => {
-  window.location.href = `${ config.kratos.browser }/self-service/browser/flows/${ type }?return_to=${config.baseUrl}/callback`
+const endpoints = {
+  login: `${ config.kratos.browser }/self-service/browser/flows/login?return_to=${config.baseUrl}/callback`,
+  register: `${ config.kratos.browser }/self-service/browser/flows/registration?return_to=${config.baseUrl}/callback`,
+  settings: `${ config.kratos.browser }/self-service/browser/flows/settings`,
 }
 
-const authHandler = ({ type  }: { type: "login" | "registration" | "settings" }) : Promise<LoginRequest | RegistrationRequest | SettingsRequest> => {
+const authHandler = ({ type  }: { type: "login" | "register" | "settings" }) : Promise<LoginRequest | RegistrationRequest | SettingsRequest> => {
   return new Promise((resolve, reject) => {
     const params = new URLSearchParams(window.location.search)
     const request = params.get("request") || ""
+    const endpoint = endpoints[type]
 
     // Ensure request exists in params.
-    if (!request) return redirectToFlow({ type })
+    if (!request) return window.location.href = endpoint
 
     let authRequest: Promise<any> | undefined
     if (type === "login") authRequest = kratos.getSelfServiceBrowserLoginRequest(request)
-    else if (type === "registration") authRequest = kratos.getSelfServiceBrowserRegistrationRequest(request)
+    else if (type === "register") authRequest = kratos.getSelfServiceBrowserRegistrationRequest(request)
     else if (type === "settings") authRequest = kratos.getSelfServiceBrowserSettingsRequest(request)
 
     if (!authRequest) return reject()
@@ -130,7 +141,7 @@ const authHandler = ({ type  }: { type: "login" | "registration" | "settings" })
       resolve(body)
     }).catch(error => {
       console.log(error)
-      return redirectToFlow({ type })
+      return window.location.href = endpoint
     })
   })
 }
@@ -162,48 +173,121 @@ const AuthMenu = () => {
   )
 }
 
-const Auth = ({ type }: ({ type: "login" | "registration" | "settings" })) => {
-  const [requestResponse, setRequestResponse] = useState<LoginRequest | RegistrationRequest | SettingsRequest>()
-
-  useEffect(() => {
-    authHandler({ type })
-      .then(request => setRequestResponse(request))
-      .catch(error => console.log(error))
-  }, [type])
-
-  const config = requestResponse?.methods?.password?.config
-
-  if (!config) return null
-
-  const { action, fields = [], messages = [] } = config
-
-  // Fields need to be sorted by priority.
-  const fieldsSorted = fields.sort((current, next) => {
+const sortFields = ({ fields }: { fields: FormField[]}) => {
+  return fields.sort((current, next) => {
     const c = FORM_LABELS[current.name]?.priority || 0
     const n = FORM_LABELS[next.name]?.priority || 0
     return n - c
   })
+}
 
-  const fieldDisplay = fieldsSorted.map(({ name, type, required, value, messages = [] }) => {
-    const _required = required ? { required } : {}
-    return (
-      <React.Fragment key={ name }>
-        { FORM_LABELS[name]?.label && <p><label>{ FORM_LABELS[name]?.label }</label></p> }
-        <input type={ type } name={ name } defaultValue={ value as any } { ..._required } />
-        <p>{ messages.map(({ text }) => text) }</p>
-      </React.Fragment>
-    )
-  })
+const KratosForm = ({ action, messages = [], fields }: { action: string, messages?: Message[], fields: FormField[] }) => (
+  <React.Fragment>
+    { messages.map(({ text }) => <p key={ text }>{ text }</p>) }
+    { action &&
+      <form action={ action } style={ { margin: "60px 0" } } method="POST">
+        { renderFormFields({ fields })}
+        <input type="submit" value="Submit"/>
+      </form> }
+  </React.Fragment>
+)
+
+const renderFormFields = ({ fields = [] }: { fields: FormField[] }) => fields.map(field => {
+  const { name, type, required, value, messages = [] } = field
+  const _required = required ? { required } : {}
+  const _label = FORM_LABELS[name]?.label
+  return (
+    <React.Fragment key={ name }>
+      { _label && <p><label>{ _label }</label></p> }
+      <input
+        type={ type }
+        name={ name }
+        defaultValue={ value as any }
+        { ..._required } />
+      <p>{ messages.map(({ text }) => text) }</p>
+    </React.Fragment>
+  )
+})
+
+const Login = () => {
+  const [requestResponse, setRequestResponse] = useState<LoginRequest>()
+
+  useEffect(() => {
+    const request = authHandler({ type: "login" }) as Promise<LoginRequest>
+    request
+      .then(request => setRequestResponse(request))
+      .catch(error => console.log(error))
+  }, [setRequestResponse])
+
+  if (!requestResponse) return null
+
+  const form = requestResponse?.methods?.password?.config
+
+  if (!form) return null
+
+  const fields = sortFields({ fields: form.fields })
 
   return (
     <React.Fragment>
       <AuthMenu />
-      { messages.map(({ text }) => <p key={ text }>{ text }</p>) }
-      { action &&
-        <form action={ action } style={ { margin: "60px 0" } } method="POST">
-          { fieldDisplay }
-          <input type="submit" value="Register"/>
-        </form> }
+      <KratosForm
+        action={ form.action }
+        fields={ fields }
+        messages={ form.messages } />
+    </React.Fragment>
+  )
+}
+
+const Register = () => {
+  const [requestResponse, setRequestResponse] = useState<RegistrationRequest>()
+
+  useEffect(() => {
+    const request = authHandler({ type: "register" }) as Promise<RegistrationRequest>
+    request
+      .then(request => setRequestResponse(request))
+      .catch(error => console.log(error))
+  }, [setRequestResponse])
+
+  const form = requestResponse?.methods?.password?.config
+
+  if (!form) return null
+
+  const fields = sortFields({ fields: form.fields })
+
+  return (
+    <React.Fragment>
+      <AuthMenu />
+      <KratosForm
+        action={ form.action }
+        fields={ fields }
+        messages={ form.messages } />
+    </React.Fragment>
+  )
+}
+
+const Settings = () => {
+  const [requestResponse, setRequestResponse] = useState<SettingsRequest>()
+
+  useEffect(() => {
+    const request = authHandler({ type: "settings" }) as Promise<SettingsRequest>
+    request
+      .then(request => setRequestResponse(request))
+      .catch(error => console.log(error))
+  }, [setRequestResponse])
+
+  const form = requestResponse?.methods?.password?.config
+
+  if (!form) return null
+
+  const fields = sortFields({ fields: form.fields || [] })
+
+  return (
+    <React.Fragment>
+      <AuthMenu />
+      <KratosForm
+        action={ form.action }
+        fields={ fields }
+        messages={ form.messages } />
     </React.Fragment>
   )
 }
@@ -248,9 +332,9 @@ function App() {
           <Routes>
             <Route path="/" element={ <Dashboard /> } />
             <Route path="/callback" element={ <Callback /> } />
-            <Route path="/auth/login" element={ <Auth type="login" /> } />
-            <Route path="/settings" element={ <Auth type="settings" /> } />
-            <Route path="/auth/registration" element={ <Auth type="registration" /> } />
+            <Route path="/auth/login" element={ <Login /> } />
+            <Route path="/settings" element={ <Settings /> } />
+            <Route path="/auth/registration" element={ <Register /> } />
           </Routes>
         </BrowserRouter>
       </IdentityProvider>
