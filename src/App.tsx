@@ -39,85 +39,15 @@ const FORM_LABELS: { [key: string]: FormLabel } = {
   }
 }
 
-const useAuth = () => {
-  const navigate = useNavigate()
-  const { pathname } = window.location
-
-  const login = () => {
-    navigate("/auth/login")
-    setAuthenticatedReferer(pathname)
+const initialiseRequest = ({ type  }: { type: "login" | "register" | "settings" | "verify" | "recover"  }) : Promise<LoginRequest | RegistrationRequest | SettingsRequest | VerificationRequest | RecoveryRequest> => {
+  const endpoints = {
+    login: `${ config.kratos.browser }/self-service/browser/flows/login?return_to=${config.baseUrl}/callback`,
+    register: `${ config.kratos.browser }/self-service/browser/flows/registration?return_to=${config.baseUrl}/callback`,
+    settings: `${ config.kratos.browser }/self-service/browser/flows/settings`,
+    verify: `${config.kratos.public}/self-service/browser/flows/verification/init/email`,
+    recover: `${config.kratos.public}/self-service/browser/flows/recovery`
   }
-
-  const register = () => {
-    navigate("/auth/registration")
-    setAuthenticatedReferer(pathname)
-  }
-
-  const logout = () => {
-    const base = config.kratos.browser
-    unsetAuthenticated()
-    window.location.href = `${base}/self-service/browser/flows/logout`
-  }
-
-  return { login, register, logout }
-}
-
-const initialIdentity: Identity = new Identity()
-
-const LSK_IS_AUTHENTICATED = "isAuthenticated"
-
-const LSK_IS_AUTHENTICATED_REFERER = "isAuthenticated.referer"
-
-const IdentityContext = createContext({
-  identity: initialIdentity
-})
-
-const useIdentity = () => useContext(IdentityContext)
-
-const getAuthenticatedReferer = () => localStorage.getItem(LSK_IS_AUTHENTICATED_REFERER)
-
-const setAuthenticatedReferer = (location: string) => localStorage.setItem(LSK_IS_AUTHENTICATED_REFERER, location)
-
-const unsetAuthenticatedReferer = () => localStorage.removeItem(LSK_IS_AUTHENTICATED_REFERER)
-
-const isAuthenticated = () => localStorage.getItem(LSK_IS_AUTHENTICATED) === "true"
-
-const setAuthenticated = () => localStorage.setItem(LSK_IS_AUTHENTICATED, "true")
-
-const unsetAuthenticated = () => localStorage.removeItem(LSK_IS_AUTHENTICATED)
-
-const IdentityProvider: React.FunctionComponent = ({ children }) => {
-  const [identity, setIdentity] = useState(initialIdentity)
-
-  useEffect(() => {
-    isAuthenticated() && kratos.whoami()
-      .then(({ body }) => {
-        setIdentity(body.identity)
-      })
-      .catch(error => {
-        unsetAuthenticated()
-        console.log(error)
-      })
-  }, [])
-
-  const context = { identity }
-
-  return (
-    <IdentityContext.Provider value={ context }>
-      { children }
-    </IdentityContext.Provider>
-  )
-}
-
-const endpoints = {
-  login: `${ config.kratos.browser }/self-service/browser/flows/login?return_to=${config.baseUrl}/callback`,
-  register: `${ config.kratos.browser }/self-service/browser/flows/registration?return_to=${config.baseUrl}/callback`,
-  settings: `${ config.kratos.browser }/self-service/browser/flows/settings`,
-  verify: `${config.kratos.public}/self-service/browser/flows/verification/init/email`,
-  recover: `${config.kratos.public}/self-service/browser/flows/recovery`
-}
-
-const authHandler = ({ type  }: { type: "login" | "register" | "settings" | "verify" | "recover"  }) : Promise<LoginRequest | RegistrationRequest | SettingsRequest | VerificationRequest | RecoveryRequest> => {
+  
   return new Promise((resolve, reject) => {
     const params = new URLSearchParams(window.location.search)
     const request = params.get("request") || ""
@@ -142,6 +72,81 @@ const authHandler = ({ type  }: { type: "login" | "register" | "settings" | "ver
       return window.location.href = endpoint
     })
   })
+}
+
+const getAuthenticatedReferer = () => localStorage.getItem(LSK_IS_AUTHENTICATED_REFERER)
+
+const setAuthenticatedReferer = (location: string) => localStorage.setItem(LSK_IS_AUTHENTICATED_REFERER, location)
+
+const unsetAuthenticatedReferer = () => localStorage.removeItem(LSK_IS_AUTHENTICATED_REFERER)
+
+const isAuthenticated = () => localStorage.getItem(LSK_IS_AUTHENTICATED) === "true"
+
+const setAuthenticated = () => localStorage.setItem(LSK_IS_AUTHENTICATED, "true")
+
+const unsetAuthenticated = () => localStorage.removeItem(LSK_IS_AUTHENTICATED)
+
+const useAuth = () => {
+  const navigate = useNavigate()
+  const { pathname } = window.location
+
+  const login = () => {
+    navigate("/auth/login")
+    setAuthenticatedReferer(pathname)
+  }
+
+  const register = () => {
+    navigate("/auth/registration")
+    setAuthenticatedReferer(pathname)
+  }
+
+  const logout = () => {
+    const base = config.kratos.browser
+    unsetAuthenticated()
+    window.location.href = `${base}/self-service/browser/flows/logout`
+  }
+
+  return {
+    login,
+    register,
+    logout,
+    initialiseRequest
+  }
+}
+
+const initialIdentity: Identity = new Identity()
+
+const LSK_IS_AUTHENTICATED = "isAuthenticated"
+
+const LSK_IS_AUTHENTICATED_REFERER = "isAuthenticated.referer"
+
+const IdentityContext = createContext({
+  identity: initialIdentity
+})
+
+const useIdentity = () => useContext(IdentityContext)
+
+const IdentityProvider: React.FunctionComponent = ({ children }) => {
+  const [identity, setIdentity] = useState(initialIdentity)
+
+  useEffect(() => {
+    isAuthenticated() && kratos.whoami()
+      .then(({ body }) => {
+        setIdentity(body.identity)
+      })
+      .catch(error => {
+        unsetAuthenticated()
+        console.log(error)
+      })
+  }, [])
+
+  const context = { identity }
+
+  return (
+    <IdentityContext.Provider value={ context }>
+      { children }
+    </IdentityContext.Provider>
+  )
 }
 
 const AuthMenu = () => {
@@ -221,7 +226,7 @@ const Login = () => {
   const [requestResponse, setRequestResponse] = useState<LoginRequest>()
 
   useEffect(() => {
-    const request = authHandler({ type: "login" }) as Promise<LoginRequest>
+    const request = initialiseRequest({ type: "login" }) as Promise<LoginRequest>
     request
       .then(request => setRequestResponse(request))
       .catch(() => {})
@@ -247,7 +252,7 @@ const Register = () => {
   const [requestResponse, setRequestResponse] = useState<RegistrationRequest>()
 
   useEffect(() => {
-    const request = authHandler({ type: "register" }) as Promise<RegistrationRequest>
+    const request = initialiseRequest({ type: "register" }) as Promise<RegistrationRequest>
     request
       .then(request => setRequestResponse(request))
       .catch(() => {})
@@ -273,7 +278,7 @@ const Settings = () => {
   const [requestResponse, setRequestResponse] = useState<SettingsRequest>()
 
   useEffect(() => {
-    const request = authHandler({ type: "settings" }) as Promise<SettingsRequest>
+    const request = initialiseRequest({ type: "settings" }) as Promise<SettingsRequest>
     request
       .then(request => setRequestResponse(request))
       .catch(() => {})
@@ -299,7 +304,7 @@ const Verify = () => {
   const [requestResponse, setRequestResponse] = useState<VerificationRequest>()
 
   useEffect(() => {
-    const request = authHandler({ type: "verify" }) as Promise<VerificationRequest>
+    const request = initialiseRequest({ type: "verify" }) as Promise<VerificationRequest>
     request
       .then(request => setRequestResponse(request))
       .catch(() => {})
@@ -327,7 +332,7 @@ const Recover = () => {
   const [requestResponse, setRequestResponse] = useState<RecoveryRequest>()
 
   useEffect(() => {
-    const request = authHandler({ type: "recover" }) as Promise<RecoveryRequest>
+    const request = initialiseRequest({ type: "recover" }) as Promise<RecoveryRequest>
     request
       .then(request => setRequestResponse(request))
       .catch(() => {})
