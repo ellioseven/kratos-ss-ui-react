@@ -1,18 +1,9 @@
-// @todo Verify
 // @todo Clean up config
 // @todo Merge auth/identity
 // @todo Refresh session.
 
 import React, { useEffect, useState, useContext, createContext } from "react"
-import {
-  Form,
-  FormField,
-  Identity,
-  LoginRequest, Message,
-  PublicApi,
-  RegistrationRequest,
-  SettingsRequest
-} from "@oryd/kratos-client"
+import { FormField, Identity, LoginRequest, Message, PublicApi, RegistrationRequest, SettingsRequest, VerificationRequest } from "@oryd/kratos-client"
 import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom"
 import "./App.css"
 import config from "./config"
@@ -117,9 +108,10 @@ const endpoints = {
   login: `${ config.kratos.browser }/self-service/browser/flows/login?return_to=${config.baseUrl}/callback`,
   register: `${ config.kratos.browser }/self-service/browser/flows/registration?return_to=${config.baseUrl}/callback`,
   settings: `${ config.kratos.browser }/self-service/browser/flows/settings`,
+  verify: `${config.kratos.public}/self-service/browser/flows/verification/init/email`
 }
 
-const authHandler = ({ type  }: { type: "login" | "register" | "settings" }) : Promise<LoginRequest | RegistrationRequest | SettingsRequest> => {
+const authHandler = ({ type  }: { type: "login" | "register" | "settings" | "verify"  }) : Promise<LoginRequest | RegistrationRequest | SettingsRequest | VerificationRequest> => {
   return new Promise((resolve, reject) => {
     const params = new URLSearchParams(window.location.search)
     const request = params.get("request") || ""
@@ -132,6 +124,7 @@ const authHandler = ({ type  }: { type: "login" | "register" | "settings" }) : P
     if (type === "login") authRequest = kratos.getSelfServiceBrowserLoginRequest(request)
     else if (type === "register") authRequest = kratos.getSelfServiceBrowserRegistrationRequest(request)
     else if (type === "settings") authRequest = kratos.getSelfServiceBrowserSettingsRequest(request)
+    else if (type === "verify") authRequest = kratos.getSelfServiceVerificationRequest(request)
 
     if (!authRequest) return reject()
 
@@ -181,16 +174,19 @@ const sortFields = ({ fields }: { fields: FormField[]}) => {
   })
 }
 
-const KratosForm = ({ action, messages = [], fields }: { action: string, messages?: Message[], fields: FormField[] }) => (
-  <React.Fragment>
-    { messages.map(({ text }) => <p key={ text }>{ text }</p>) }
-    { action &&
+const KratosForm = ({ action, messages = [], fields }: { action: string, messages?: Message[], fields: FormField[] }) => {
+  const fieldsSorted = sortFields({ fields })
+  return (
+    <React.Fragment>
+      { messages.map(({ text }) => <p key={ text }>{ text }</p>) }
+      { action &&
       <form action={ action } style={ { margin: "60px 0" } } method="POST">
-        { renderFormFields({ fields })}
+        { renderFormFields({ fields: fieldsSorted })}
         <input type="submit" value="Submit"/>
       </form> }
-  </React.Fragment>
-)
+    </React.Fragment>
+  )
+}
 
 const renderFormFields = ({ fields = [] }: { fields: FormField[] }) => fields.map(field => {
   const { name, type, required, value, messages = [] } = field
@@ -209,6 +205,13 @@ const renderFormFields = ({ fields = [] }: { fields: FormField[] }) => fields.ma
   )
 })
 
+const KratosMessages = ({ messages }: { messages: Message[] }) => (
+  <React.Fragment>
+    { messages.map(({ text, id }) =>
+      <p key={ id }>{ text }</p>) }
+  </React.Fragment>
+)
+
 const Login = () => {
   const [requestResponse, setRequestResponse] = useState<LoginRequest>()
 
@@ -219,21 +222,21 @@ const Login = () => {
       .catch(error => console.log(error))
   }, [setRequestResponse])
 
-  if (!requestResponse) return null
-
+  const messages = requestResponse?.messages
   const form = requestResponse?.methods?.password?.config
-
-  if (!form) return null
-
-  const fields = sortFields({ fields: form.fields })
 
   return (
     <React.Fragment>
       <AuthMenu />
-      <KratosForm
-        action={ form.action }
-        fields={ fields }
-        messages={ form.messages } />
+      { messages && <KratosMessages messages={ messages } /> }
+      { form &&
+        <React.Fragment>
+          <h4>Resend Verification Code</h4>
+          <KratosForm
+            action={ form.action }
+            fields={ form.fields }
+            messages={ form.messages } />
+        </React.Fragment> }
     </React.Fragment>
   )
 }
@@ -249,18 +252,17 @@ const Register = () => {
   }, [setRequestResponse])
 
   const form = requestResponse?.methods?.password?.config
-
-  if (!form) return null
-
-  const fields = sortFields({ fields: form.fields })
+  const messages = requestResponse?.messages
 
   return (
     <React.Fragment>
       <AuthMenu />
-      <KratosForm
-        action={ form.action }
-        fields={ fields }
-        messages={ form.messages } />
+      { messages && <KratosMessages messages={ messages } /> }
+      { form &&
+        <KratosForm
+          action={ form.action }
+          fields={ form.fields }
+          messages={ form.messages } /> }
     </React.Fragment>
   )
 }
@@ -276,18 +278,44 @@ const Settings = () => {
   }, [setRequestResponse])
 
   const form = requestResponse?.methods?.password?.config
-
-  if (!form) return null
-
-  const fields = sortFields({ fields: form.fields || [] })
+  const messages = requestResponse?.messages
 
   return (
     <React.Fragment>
       <AuthMenu />
-      <KratosForm
-        action={ form.action }
-        fields={ fields }
-        messages={ form.messages } />
+      { messages && <KratosMessages messages={ messages } /> }
+      { form &&
+        <KratosForm
+          action={ form.action }
+          fields={ form.fields }
+          messages={ form.messages } /> }
+    </React.Fragment>
+  )
+}
+
+const Verify = () => {
+  const [requestResponse, setRequestResponse] = useState<VerificationRequest>()
+
+  useEffect(() => {
+    const request = authHandler({ type: "verify" }) as Promise<VerificationRequest>
+    request
+      .then(request => setRequestResponse(request))
+      .catch(error => console.log(error))
+  }, [setRequestResponse])
+
+  if (!requestResponse) return null
+
+  const { form, messages } = requestResponse
+
+  return (
+    <React.Fragment>
+      <AuthMenu />
+      { messages && <KratosMessages messages={ messages } /> }
+      { form &&
+        <KratosForm
+          action={ form.action }
+          fields={ form.fields }
+          messages={ form.messages }/> }
     </React.Fragment>
   )
 }
@@ -334,6 +362,7 @@ function App() {
             <Route path="/callback" element={ <Callback /> } />
             <Route path="/auth/login" element={ <Login /> } />
             <Route path="/settings" element={ <Settings /> } />
+            <Route path="/verify" element={ <Verify /> } />
             <Route path="/auth/registration" element={ <Register /> } />
           </Routes>
         </BrowserRouter>
