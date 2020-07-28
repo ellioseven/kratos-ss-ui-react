@@ -6,6 +6,7 @@ React! Currently a work in progress.
 ## Installation
 
 ```
+docker-compose run --rm kratos-ss-ui-react yarn install
 docker-compose up -d
 browse 127.0.0.1:4455
 ```
