@@ -27,6 +27,22 @@ body {
   background: var(--base-dark);
 }
 
+button.a {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--base-text);
+  padding: 0;
+  margin: 0;
+  text-decoration: underline;
+}
+
+button.a:hover,
+button.a:focus {
+  color: var(--base-white);
+  cursor: pointer;
+}
+
 h1 {
   font-style: normal;
   font-weight: normal;
