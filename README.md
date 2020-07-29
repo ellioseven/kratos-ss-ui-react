@@ -21,4 +21,3 @@ browse 127.0.0.1:4455
 - Password Toggle
 - KratosMessage types (global, etc.)
 - Don't hard code auth routes
-- Settings success

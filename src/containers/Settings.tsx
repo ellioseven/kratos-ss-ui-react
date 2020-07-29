@@ -15,6 +15,7 @@ export const Settings = () => {
       .catch(() => {})
   }, [setRequestResponse])
 
+  const { state } = requestResponse || {}
   const formPassword = requestResponse?.methods?.password?.config
   const formProfile = requestResponse?.methods?.profile?.config
   const messages = requestResponse?.messages
@@ -24,6 +25,7 @@ export const Settings = () => {
       <Header />
       <div className="container">
         <h2>Settings</h2>
+        { state === "success" && <p>Your changes have been saved!</p>}
         { messages && <KratosMessages messages={ messages } /> }
         <div id="user-password">
           <h3>Profile</h3>
