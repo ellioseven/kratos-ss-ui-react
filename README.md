@@ -17,5 +17,3 @@ browse 127.0.0.1:4455
 - Implement session refresh
 - Implement Kratos config
 - Investigate Kratos client bundle size
-- Implement custom button messages
-- Don't hard code auth routes

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react"
+import { Link } from "react-router-dom"
 import { LoginRequest } from "@oryd/kratos-client"
 import { initialiseRequest } from "services/kratos"
 import { IconLogo } from "components/IconLogo"
 import { KratosMessages } from "components/KratosMessages"
 import { KratosForm } from "components/KratosForm"
 import { useAuth } from "services/auth"
+import config from "config/kratos"
 
 export const Login = () => {
   const { register } = useAuth()
@@ -28,16 +30,16 @@ export const Login = () => {
         <div id="login-password">
           { messages && <KratosMessages messages={ messages } /> }
           { form &&
-          <KratosForm
-            submitLabel="Sign in"
-            action={ form.action }
-            fields={ form.fields }
-            messages={ form.messages } /> }
+            <KratosForm
+              submitLabel="Sign in"
+              action={ form.action }
+              fields={ form.fields }
+              messages={ form.messages } /> }
         </div>
         <hr className="divider" />
         <div className="alternative-actions">
           <p><button onClick={ register } className="a">Register new account</button></p>
-          <p><a href="/recovery">Reset password</a></p>
+          <p><Link to={ config.routes.recovery.path }>Reset password</Link></p>
         </div>
       </div>
     </div>

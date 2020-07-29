@@ -10,5 +10,22 @@ export default {
     public: KRATOS_PUBLIC_URL,
   },
   baseUrl: BASE_URL,
-  projectName: "SecureApp"
+  projectName: "SecureApp",
+  routes: {
+    settings: {
+      path: "/settings"
+    },
+    recovery: {
+      path: "/recovery"
+    },
+    verification: {
+      path: "/verify"
+    },
+    login: {
+      path: "/auth/login"
+    },
+    registration: {
+      path: "/auth/registration"
+    }
+  }
 }

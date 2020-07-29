@@ -1,5 +1,3 @@
-// @todo Merge initialiseRequest?
-
 import { useNavigate } from "react-router-dom"
 import config from "config/kratos"
 
@@ -24,12 +22,12 @@ export const useAuth = () => {
   const { pathname } = window.location
 
   const login = () => {
-    navigate("/auth/login")
+    navigate(config.routes.login.path)
     setAuthenticatedReferer(pathname)
   }
 
   const register = () => {
-    navigate("/auth/registration")
+    navigate(config.routes.registration.path)
     setAuthenticatedReferer(pathname)
   }
 
