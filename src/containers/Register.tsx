@@ -35,7 +35,7 @@ export const Register = () => {
         </div>
         <hr className="divider" />
         <div className="alternative-actions">
-          <p><a onClick={ login } href="#">Already have an account? Log in instead</a></p>
+          <p><button onClick={ login } className="a">Already have an account? Log in instead</button></p>
         </div>
       </div>
     </div>

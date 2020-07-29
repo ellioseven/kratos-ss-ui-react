@@ -18,6 +18,4 @@ browse 127.0.0.1:4455
 - Implement Kratos config
 - Investigate Kratos client bundle size
 - Implement custom button messages
-- Password Toggle
-- KratosMessage types (global, etc.)
 - Don't hard code auth routes

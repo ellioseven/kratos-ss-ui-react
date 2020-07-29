@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { VerificationRequest } from "@oryd/kratos-client"
 import { initialiseRequest } from "services/kratos"
-import { AuthMenu } from "components/AuthMenu"
 import { KratosMessages } from "components/KratosMessages"
 import { KratosForm } from "components/KratosForm"
 import { Header } from "components/Header"

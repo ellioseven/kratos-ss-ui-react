@@ -16,10 +16,10 @@ export const Header = () => {
           <a href="/settings"><IconGear /></a>
         </div>
         <div className="logout">
-          <a href="#" onClick={ logout }><IconSignOut /></a>
+          <button onClick={ logout } className="a"><IconSignOut /></button>
         </div>
         <div className="fork">
-          <a href="https://github.com/ellioseven/kratos-ss-ui-react" target="_blank">
+          <a href="https://github.com/ellioseven/kratos-ss-ui-react" target="_blank" rel="noopener noreferrer">
             <IconRepoForked />
             <div>Fork on<br/>GitHub</div>
           </a>

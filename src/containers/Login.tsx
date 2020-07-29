@@ -35,7 +35,7 @@ export const Login = () => {
         </div>
         <hr className="divider" />
         <div className="alternative-actions">
-          <p><a onClick={ register } href="#">Register new account</a></p>
+          <p><button onClick={ register } className="a">Register new account</button></p>
           <p><a href="/recovery">Reset password</a></p>
         </div>
       </div>

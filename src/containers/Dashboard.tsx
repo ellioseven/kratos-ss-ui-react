@@ -12,7 +12,7 @@ export const Dashboard = () => {
   useEffect(() => {
     // Ensure user is logged in.
     if (!isAuthenticated()) login()
-  }, [])
+  }, [isAuthenticated, login])
 
   if (!user) return null
 
