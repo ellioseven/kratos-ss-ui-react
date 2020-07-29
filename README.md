@@ -15,7 +15,7 @@ browse 127.0.0.1:4455
   to set authentication session, preventing multiple unnecessary API calls
 - `isAuthenticated` flag is set on the `callback` route, which the user is
   redirected to after a login or registration
-- Header's are not available to React, so only the cookie based security
+- Headers are not available to React, so only the cookie based security
   method is available
 
 ## @todo
