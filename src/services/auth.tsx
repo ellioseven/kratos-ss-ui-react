@@ -42,6 +42,7 @@ export const useAuth = () => {
   return {
     login,
     register,
-    logout
+    logout,
+    isAuthenticated
   }
 }

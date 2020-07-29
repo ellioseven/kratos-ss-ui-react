@@ -1,17 +1,382 @@
-a {
-  color: #08c;
+@import url('https://fonts.googleapis.com/css?family=IBM+Plex+Sans:300,400,500&display=swap');
+
+:root {
+  --base-white: #FFFFFF;
+  --base-light: #F0F0F1;
+  --base-text: #99999E;
+  --base-main: #5A5B6A;
+  --base-dark: #19191D;
+  --base-black: #000000;
+  --primary-light: #ECFDFE;
+  --primary-half: #95E1F9;
+  --primary-main: #3DACFC;
+  --primary-dark: #2E0473;
+  --red-strong: #F44336;
+  --green-strong: #43A047;
 }
 
-.auth-menu button {
-  appearance: none;
-  background: transparent;
+html, body {
+  min-height: 100vh;
+  text-rendering: geometricPrecision;
+}
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 16px;
+  color: var(--base-light);
+  background: var(--base-dark);
+}
+
+h1 {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 96px;
+  line-height: 126%;
+}
+
+h2 {
+  font-style: normal;
+  font-weight: 300;
+  font-size: 36px;
+  line-height: 126%;
+}
+
+h3 {
+  font-style: normal;
+  font-weight: 300;
+  font-size: 20px;
+  line-height: 168%;
+}
+
+h4 {
+  font-style: normal;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 168%;
+}
+
+h5 {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 168%;
+}
+
+.label {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 1rem;
+  line-height: 168%;
+}
+
+.text {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 1.5rem;
+  line-height: 168%;
+}
+
+.tiny-text {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 0.666rem;
+  line-height: 100%;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 600px;
+  margin: 0 auto;
+}
+
+.auth .container {
+  width: 300px;
+}
+
+.logo {
+  pointer-events: none;
+  margin: 0 auto 2rem 0;
+}
+
+.content {
+  font-style: normal;
+  font-weight: normal;
+  line-height: 160%;
+}
+
+.content p {
+  font-style: normal;
+  font-weight: normal;
+  line-height: 160%;
+}
+
+.content .header {
+  padding: 1.666rem 11.5rem;
+  display: flex;
+  box-sizing: border-box;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--primary-main);
+}
+
+.content .header .icon-actions > div {
+  display: inline;
+  margin: 0 0.5rem;
+}
+
+.content .header .icon-actions .fork path {
+  fill: var(--primary-main);
+  transition: fill 0.1s ease-in-out;
+}
+
+.content .header .icon-actions .fork:hover path {
+  fill: var(--primary-light);
+}
+
+.content .header .icon-actions .fork a,
+.content .header .icon-actions .fork a:visited {
+  color: var(--primary-main);
+  text-decoration: none;
+  transition: color 0.1s ease-in-out;
+  font-size: 0.666em;
+  line-height: 1em;
+}
+
+.content .header .icon-actions .fork a div {
+  display: inline-block;
+}
+
+.content .header .icon-actions .fork a:hover {
+  color: var(--primary-light);
+}
+
+.content .header .logo {
+  height: 2rem;
+  margin: 0;
+}
+
+.content .header .logout a,
+.content .header .logout a:link {
+  color: white;
+  text-decoration: none;
+  transition: ease 200ms;
+}
+
+.content .header .logout a:hover,
+.content .header .logout a:active {
+  color: var(--primary-light);
+}
+
+.content .container {
+  font-style: normal;
+  font-weight: 600;
+  line-height: 160%;
+  margin-top: 4rem;
+}
+
+h4:first-child {
+  margin: 0;
+}
+
+h4 ~ h5 {
+  margin: -0.25rem 0 1rem 0;
+}
+
+.content .greeting .user-identifier {
+  color: var(--primary-main);
+}
+
+.container pre {
+  text-align: left;
+  background: black;
+  color: white;
+  padding: 13px;
+  overflow: auto;
+}
+
+.container pre code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 160%;
+}
+
+.container p {
+  margin-bottom: 1rem;
+}
+
+.container p > code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 160%;
+  background: black;
+  color: white;
+  padding: 2px 4px;
+}
+
+.container form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.container .kratos-errors:not(:empty) {
+  margin-bottom: 1em;
+  text-align: left;
+}
+
+.container .kratos-errors p {
+  margin: 1em 0;
+}
+
+.content .container a {
+  color: var(--primary-main);
+  transition: color 0.1s ease-in-out;
+}
+
+.container a:hover {
+  color: var(--base-white);
+}
+
+form {
+  line-height: 1.15;
+  font-weight: normal;
+  margin: 0.5rem 0;
+}
+
+form input, form button {
+  outline: none;
+}
+
+form fieldset {
   border: 0;
-  color: #08c;
-  cursor: pointer;
-  font-size: inherit;
-  text-decoration: underline;
+  margin-bottom: 1rem;
+  padding: 0;
 }
 
-.App {
+form label {
+  position: relative;
+}
+
+form label span {
+  position: absolute;
+  color: var(--base-text);
+  top: calc(0.875em / 2 - 6px);
+  font-size: 1em;
+  left: 0.666em;
+  transition: font-size 0.1s ease-in-out, top 0.1s ease-in-out, color 0.1s ease-in-out;
+  pointer-events: none;
+}
+
+form label input:not(:placeholder-shown) ~ span {
+  font-size: 0.75em;
+  top: -0.9em;
+  left: 0.666rem;
+  color: var(--base-text);
+}
+
+form button {
+  border-radius: 0.225em;
+  background-color: var(--primary-main);
+  color: var(--base-white);
+  border-width: 0;
+  padding: 0.875em 0.5em;
+  transition: background-color 0.1s ease-in-out, color 0.1s ease-in-out;
+  margin-top: 3rem;
+  cursor: pointer;
+}
+
+form button:hover {
+  background-color: var(--primary-half);
+  color: var(--primary-dark);
+}
+
+form label input {
+  border-radius: 0.166em;
+  background-color: var(--base-black);
+  border-width: 0;
+  color: var(--base-white);
+  padding: 0.875em 0.666em;
+  font-size: inherit;
+  line-height: 168%;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+}
+
+.messages {
+  font-size: 14px;
+  padding: 0 2px;
+}
+
+.messages .info,
+.messages .error {
+  margin-top: 8px;
+}
+
+form input::placeholder {
+  color: transparent;
+}
+
+.password-visibility-toggle path {
+  fill: var(--base-white);
+}
+
+.password-visibility-toggle {
+  position: absolute;
+  top: 0.2125rem;
+  right: 1em;
+  height: 1em;
+  width: 1em;
+  cursor: pointer;
+}
+
+input[type="text"] ~ .password-visibility-toggle .eye-closed,
+input[type="password"] ~ .password-visibility-toggle .eye-open {
+  display: inline;
+}
+
+input[type="password"] ~ .password-visibility-toggle .eye-closed,
+input[type="text"] ~ .password-visibility-toggle .eye-open  {
+  display: none;
+}
+
+
+.auth {
+  min-height: 100vh;
+  color: var(--primary-light);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.auth .subheading {
+  margin-bottom: 1.5rem;
   text-align: center;
+  color: var(--base-text);
+}
+
+.auth a {
+  color: var(--base-text);
+  transition: color 0.1s ease-in-out;
+}
+
+.auth a:hover {
+  color: var(--base-white);
+}
+
+.auth .divider {
+  width: 100%;
+  border-color: var(--base-main);
+  margin: 2rem 0;
+}
+
+.auth .alternative-actions {
+  display: flex;
+  justify-content: space-between;
 }

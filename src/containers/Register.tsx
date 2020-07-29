@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react"
 import { RegistrationRequest } from "@oryd/kratos-client"
 import { initialiseRequest } from "services/kratos"
-import { AuthMenu } from "components/AuthMenu"
 import { KratosMessages } from "components/KratosMessages"
 import { KratosForm } from "components/KratosForm"
+import { IconLogo } from "components/IconLogo"
+import { useAuth } from "services/auth"
 
 export const Register = () => {
+  const { login } = useAuth()
   const [requestResponse, setRequestResponse] = useState<RegistrationRequest>()
 
   useEffect(() => {
@@ -19,14 +21,23 @@ export const Register = () => {
   const messages = requestResponse?.messages
 
   return (
-    <React.Fragment>
-      <AuthMenu />
-      { messages && <KratosMessages messages={ messages } /> }
-      { form &&
-      <KratosForm
-        action={ form.action }
-        fields={ form.fields }
-        messages={ form.messages } /> }
-    </React.Fragment>
+    <div className="auth">
+      <div className="container">
+        <IconLogo />
+        <h5 className="subheading">Welcome to SecureApp! <br/>Use the form below to sign up:</h5>
+        <div id="registration-password">
+          { messages && <KratosMessages messages={ messages } /> }
+          { form &&
+            <KratosForm
+              action={ form.action }
+              fields={ form.fields }
+              messages={ form.messages } /> }
+        </div>
+        <hr className="divider" />
+        <div className="alternative-actions">
+          <p><a onClick={ login } href="#">Already have an account? Log in instead</a></p>
+        </div>
+      </div>
+    </div>
   )
 }

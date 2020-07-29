@@ -4,6 +4,7 @@ import { initialiseRequest } from "services/kratos"
 import { AuthMenu } from "components/AuthMenu"
 import { KratosMessages } from "components/KratosMessages"
 import { KratosForm } from "components/KratosForm"
+import { Header } from "components/Header"
 
 export const Verify = () => {
   const [requestResponse, setRequestResponse] = useState<VerificationRequest>()
@@ -18,17 +19,19 @@ export const Verify = () => {
   const { form, messages } = requestResponse || {}
 
   return (
-    <React.Fragment>
-      <AuthMenu />
-      { messages && <KratosMessages messages={ messages } /> }
-      { form &&
-      <React.Fragment>
-        <h4>Resend Verification Code</h4>
-        <KratosForm
-          action={ form.action }
-          fields={ form.fields }
-          messages={ form.messages } />
-      </React.Fragment> }
-    </React.Fragment>
+    <div className="content">
+      <Header />
+      <div className="container">
+        <h4>Resend verification code</h4>
+        { messages && <KratosMessages messages={ messages } /> }
+        { form &&
+          <React.Fragment>
+            <KratosForm
+              action={ form.action }
+              fields={ form.fields }
+              messages={ form.messages } />
+          </React.Fragment> }
+      </div>
+    </div>
   )
 }

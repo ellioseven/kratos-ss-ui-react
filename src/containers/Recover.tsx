@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react"
 import { RecoveryRequest } from "@oryd/kratos-client"
 import { initialiseRequest } from "services/kratos"
-import { AuthMenu } from "components/AuthMenu"
 import { KratosMessages } from "components/KratosMessages"
 import { KratosForm } from "components/KratosForm"
+import { Header } from "components/Header"
 
 export const Recover = () => {
   const [requestResponse, setRequestResponse] = useState<RecoveryRequest>()
@@ -19,16 +19,17 @@ export const Recover = () => {
   const messages = requestResponse?.messages
 
   return (
-    <React.Fragment>
-      <AuthMenu />
-      { messages && <KratosMessages messages={ messages } /> }
-      { form &&
-      <React.Fragment>
-        <KratosForm
-          action={ form.action }
-          fields={ form.fields }
-          messages={ form.messages } />
-      </React.Fragment> }
-    </React.Fragment>
+    <div className="content">
+      <Header />
+      <div className="container">
+        <h4>Recover Your Account</h4>
+        { messages && <KratosMessages messages={ messages } /> }
+        { form &&
+          <KratosForm
+            action={ form.action }
+            fields={ form.fields }
+            messages={ form.messages } /> }
+      </div>
+    </div>
   )
 }

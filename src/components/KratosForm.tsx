@@ -1,17 +1,18 @@
 import React from "react"
 import { FormField, Message } from "@oryd/kratos-client"
 import { FORM_LABELS } from "constants/kratos"
+import { KratosMessages } from "components/KratosMessages"
 
 export const KratosForm = ({ action, messages = [], fields }: { action: string, messages?: Message[], fields: FormField[] }) => {
   const fieldsSorted = sortFormFields({ fields })
   return (
     <React.Fragment>
-      { messages.map(({ text }) => <p key={ text }>{ text }</p>) }
+      { !!messages?.length && <KratosMessages messages={ messages } /> }
       { action &&
-      <form action={ action } style={ { margin: "60px 0" } } method="POST">
-        { renderFormFields({ fields: fieldsSorted })}
-        <input type="submit" value="Submit"/>
-      </form> }
+        <form action={ action } style={ { margin: "60px 0" } } method="POST">
+          { renderFormFields({ fields: fieldsSorted })}
+          <button type="submit">Submit</button>
+        </form> }
     </React.Fragment>
   )
 }
@@ -28,15 +29,18 @@ const renderFormFields = ({ fields = [] }: { fields: FormField[] }) => fields.ma
   const { name, type, required, value, messages = [] } = field
   const _required = required ? { required } : {}
   const _label = FORM_LABELS[name]?.label
+  const style = type === "hidden" ? { display: "none" } : {}
   return (
-    <React.Fragment key={ name }>
-      { _label && <p><label>{ _label }</label></p> }
-      <input
-        type={ type }
-        name={ name }
-        defaultValue={ value as any }
-        { ..._required } />
-      <p>{ messages.map(({ text }) => text) }</p>
-    </React.Fragment>
+    <fieldset key={ name } style={ style }>
+      <label>
+        <input
+          type={ type }
+          name={ name }
+          defaultValue={ value as any }
+          { ..._required } />
+        { _label && <span>{ _label }</span> }
+      </label>
+      <KratosMessages messages={ messages } />
+    </fieldset>
   )
 })
