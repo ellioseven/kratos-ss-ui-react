@@ -26,6 +26,7 @@ export const Recover = () => {
         { messages && <KratosMessages messages={ messages } /> }
         { form &&
           <KratosForm
+            submitLabel="Send recovery link"
             action={ form.action }
             fields={ form.fields }
             messages={ form.messages } /> }

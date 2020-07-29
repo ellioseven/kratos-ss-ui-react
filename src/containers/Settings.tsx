@@ -31,6 +31,7 @@ export const Settings = () => {
           <h3>Profile</h3>
           { formProfile &&
             <KratosForm
+              submitLabel="Save"
               action={ formProfile.action }
               fields={ formProfile.fields }
               messages={ formProfile.messages } /> }
@@ -39,6 +40,7 @@ export const Settings = () => {
           <h3>Password</h3>
           { formPassword &&
           <KratosForm
+            submitLabel="Save"
             action={ formPassword.action }
             fields={ formPassword.fields }
             messages={ formPassword.messages } /> }

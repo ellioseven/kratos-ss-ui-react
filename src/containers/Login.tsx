@@ -29,6 +29,7 @@ export const Login = () => {
           { messages && <KratosMessages messages={ messages } /> }
           { form &&
           <KratosForm
+            submitLabel="Sign in"
             action={ form.action }
             fields={ form.fields }
             messages={ form.messages } /> }

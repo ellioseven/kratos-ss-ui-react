@@ -26,6 +26,7 @@ export const Verify = () => {
         { form &&
           <React.Fragment>
             <KratosForm
+              submitLabel="Resend verification code"
               action={ form.action }
               fields={ form.fields }
               messages={ form.messages } />

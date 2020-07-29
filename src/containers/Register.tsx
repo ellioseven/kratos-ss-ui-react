@@ -29,6 +29,7 @@ export const Register = () => {
           { messages && <KratosMessages messages={ messages } /> }
           { form &&
             <KratosForm
+              submitLabel="Sign up"
               action={ form.action }
               fields={ form.fields }
               messages={ form.messages } /> }

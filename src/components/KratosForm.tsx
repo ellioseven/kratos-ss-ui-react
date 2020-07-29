@@ -3,7 +3,7 @@ import { FormField, Message } from "@oryd/kratos-client"
 import { FORM_LABELS } from "constants/kratos"
 import { KratosMessages } from "components/KratosMessages"
 
-export const KratosForm = ({ action, messages = [], fields }: { action: string, messages?: Message[], fields: FormField[] }) => {
+export const KratosForm = ({ action, messages = [], fields, submitLabel = "Submit" }: { action: string, messages?: Message[], fields: FormField[], submitLabel: string }) => {
   const fieldsSorted = sortFormFields({ fields })
   return (
     <React.Fragment>
@@ -11,7 +11,7 @@ export const KratosForm = ({ action, messages = [], fields }: { action: string, 
       { action &&
         <form action={ action } style={ { margin: "60px 0" } } method="POST">
           { renderFormFields({ fields: fieldsSorted })}
-          <button type="submit">Submit</button>
+          <button type="submit">{ submitLabel }</button>
         </form> }
     </React.Fragment>
   )
