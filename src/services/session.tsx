@@ -12,7 +12,7 @@ const SessionContext = createContext(
 export const useSession = () => useContext(SessionContext)
 
 export const SessionProvider: React.FunctionComponent = ({ children }) => {
-  const { refresh } = useAuth()
+  const { refresh, login } = useAuth()
   const [session, setSession] = useState(
     new Session()
   )
@@ -26,8 +26,10 @@ export const SessionProvider: React.FunctionComponent = ({ children }) => {
         else setSession(body)
       })
       .catch(error => {
+        // Request may fail due to an expired token.
         unsetAuthenticated()
         console.log(error)
+        login()
       })
   }, [])
 
