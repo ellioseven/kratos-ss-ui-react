@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom"
 import config from "config/kratos"
+import { useCallback } from "react"
 
 export const LSK_IS_AUTHENTICATED = "isAuthenticated"
 
@@ -21,27 +22,31 @@ export const useAuth = () => {
   const navigate = useNavigate()
   const { pathname } = window.location
 
-  const login = () => {
+  const login = useCallback(() => {
     navigate(config.routes.login.path)
     setAuthenticatedReferer(pathname)
-  }
+  // eslint-disable-next-line
+  }, [])
 
-  const register = () => {
+  const register = useCallback(() => {
     navigate(config.routes.registration.path)
     setAuthenticatedReferer(pathname)
-  }
+  // eslint-disable-next-line
+  }, [])
 
-  const logout = () => {
+  const logout = useCallback(() => {
     const base = config.kratos.browser
     unsetAuthenticated()
     window.location.href = `${base}/self-service/browser/flows/logout`
-  }
+  // eslint-disable-next-line
+  }, [])
 
-  const refresh = () => {
+  const refresh = useCallback(() => {
     const base = config.kratos.browser
     unsetAuthenticated()
     window.location.href = `${base}/self-service/browser/flows/login?refresh=true&return_to=${config.baseUrl}/callback`
-  }
+  // eslint-disable-next-line 
+  }, [])
 
   return {
     login,

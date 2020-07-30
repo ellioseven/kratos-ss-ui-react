@@ -12,7 +12,8 @@ export const Dashboard = () => {
   useEffect(() => {
     // Ensure user is logged in.
     if (!isAuthenticated()) login()
-  }, [isAuthenticated, login])
+  // eslint-disable-next-line
+  }, [])
 
   if (!user) return null
 

@@ -22,6 +22,7 @@ export const SessionProvider: React.FunctionComponent = ({ children }) => {
       .then(({ body }) => {
         const now = new Date()
         const expiry = body.expiresAt
+        console.log(now > expiry)
         // Expired sessions need to be refreshed.
         if (now > expiry) return refresh()
         else setSession(body)
