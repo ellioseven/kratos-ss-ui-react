@@ -32,7 +32,7 @@ export const SessionProvider: React.FunctionComponent = ({ children }) => {
         console.log(error)
         login()
       })
-  }, [])
+  }, [login, refresh])
 
   return (
     <SessionContext.Provider value={ session }>
