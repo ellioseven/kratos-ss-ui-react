@@ -23,7 +23,6 @@ browse 127.0.0.1:4455
 ## @todo
 
 - Implement error page
-- Implement session refresh
 - Implement configurable Kratos config
 - Investigate Kratos client bundle size
 - OIDC support
