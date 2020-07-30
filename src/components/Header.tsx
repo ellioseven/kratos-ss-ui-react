@@ -8,18 +8,21 @@ import { IconRepoForked } from "components/IconRepoForked"
 import config from "config/kratos"
 
 export const Header = () => {
-  const { logout } = useAuth()
+  const { isAuthenticated, logout } = useAuth()
 
   return (
     <div className="header">
       <Link to="/"><IconLogo /></Link>
       <div className="icon-actions">
-        <div className="settings">
-          <Link to={ config.routes.settings.path }><IconGear /></Link>
-        </div>
-        <div className="logout">
-          <button onClick={ logout } className="a"><IconSignOut /></button>
-        </div>
+        { isAuthenticated() &&
+          <React.Fragment>
+            <div className="settings">
+              <Link to={ config.routes.settings.path }><IconGear /></Link>
+            </div>
+            <div className="logout">
+              <button onClick={ logout } className="a"><IconSignOut /></button>
+            </div>
+          </React.Fragment> }
         <div className="fork">
           <a href="https://github.com/ellioseven/kratos-ss-ui-react" target="_blank" rel="noopener noreferrer">
             <IconRepoForked />
