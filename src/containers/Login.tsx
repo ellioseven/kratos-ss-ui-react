@@ -5,11 +5,10 @@ import { initialiseRequest } from "services/kratos"
 import { IconLogo } from "components/IconLogo"
 import { KratosMessages } from "components/KratosMessages"
 import { KratosForm } from "components/KratosForm"
-import { useAuth } from "services/auth"
+import { register } from "services/auth"
 import config from "config/kratos"
 
 export const Login = () => {
-  const { register } = useAuth()
   const [requestResponse, setRequestResponse] = useState<LoginRequest>()
 
   useEffect(() => {
@@ -38,8 +37,14 @@ export const Login = () => {
         </div>
         <hr className="divider" />
         <div className="alternative-actions">
-          <p><button onClick={ register } className="a">Register new account</button></p>
-          <p><Link to={ config.routes.recovery.path }>Reset password</Link></p>
+          <p>
+            <button onClick={ () => register({ setReferer: false }) } className="a">
+              Register new account
+            </button>
+          </p>
+          <p>
+            <Link to={ config.routes.recovery.path }>Reset password</Link>
+          </p>
         </div>
       </div>
     </div>

@@ -4,10 +4,9 @@ import { initialiseRequest } from "services/kratos"
 import { KratosMessages } from "components/KratosMessages"
 import { KratosForm } from "components/KratosForm"
 import { IconLogo } from "components/IconLogo"
-import { useAuth } from "services/auth"
+import { login } from "services/auth"
 
 export const Register = () => {
-  const { login } = useAuth()
   const [requestResponse, setRequestResponse] = useState<RegistrationRequest>()
 
   useEffect(() => {
@@ -36,7 +35,11 @@ export const Register = () => {
         </div>
         <hr className="divider" />
         <div className="alternative-actions">
-          <p><button onClick={ login } className="a">Already have an account? Log in instead</button></p>
+          <p>
+            <button onClick={ () => login({ setReferer: false }) } className="a">
+              Already have an account? Log in instead
+            </button>
+          </p>
         </div>
       </div>
     </div>

@@ -1,18 +1,14 @@
 import React, { useEffect } from "react"
 import { useSession } from "services/session"
 import { Header } from "components/Header"
-import { useAuth } from "services/auth"
+import { isAuthenticated, login } from "services/auth"
 
 export const Dashboard = () => {
-  const { isAuthenticated, login } = useAuth()
   const session = useSession()
-
   const user = session?.identity?.traits as any
 
   useEffect(() => {
-    // Ensure user is logged in.
     if (!isAuthenticated()) login()
-  // eslint-disable-next-line
   }, [])
 
   if (!user) return null

@@ -1,26 +1,24 @@
 import { useEffect } from "react"
-import { getAuthenticatedReferer } from "services/auth"
 import { PublicApi } from "@oryd/kratos-client"
 import config from "config/kratos"
-import { setAuthenticated, unsetAuthenticated, unsetAuthenticatedReferer } from "services/auth"
+import { setAuthenticated, unsetAuthenticated, unsetAuthenticatedReferer, getAuthenticatedReferer } from "services/auth"
 
 const kratos = new PublicApi(config.kratos.public)
 
 export const Callback = () => {
-  const returnLocation = getAuthenticatedReferer() || "/"
-
   useEffect(() => {
     kratos.whoami()
       .then(() => {
         setAuthenticated()
         unsetAuthenticatedReferer()
-        window.location.href = returnLocation
+        window.location.href = getAuthenticatedReferer() || "/"
       })
       .catch(error => {
         unsetAuthenticated()
+        unsetAuthenticatedReferer()
         console.log(error)
       })
-  }, [returnLocation])
+  }, [])
 
   return null
 }
