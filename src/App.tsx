@@ -14,19 +14,19 @@ import "./App.css"
 function App() {
   return (
     <div className="App">
-      <SessionProvider>
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={ <Dashboard /> } />
-            <Route path="/callback" element={ <Callback /> } />
-            <Route path={ config.routes.login.path } element={ <Login /> } />
-            <Route path={ config.routes.settings.path } element={ <Settings /> } />
-            <Route path={ config.routes.verification.path } element={ <Verify /> } />
-            <Route path={ config.routes.recovery.path } element={ <Recover /> } />
-            <Route path={ config.routes.registration.path } element={ <Register /> } />
-          </Routes>
+          <SessionProvider>
+            <Routes>
+              <Route path="/" element={ <Dashboard /> } />
+              <Route path="/callback" element={ <Callback /> } />
+              <Route path={ config.routes.login.path } element={ <Login /> } />
+              <Route path={ config.routes.settings.path } element={ <Settings /> } />
+              <Route path={ config.routes.verification.path } element={ <Verify /> } />
+              <Route path={ config.routes.recovery.path } element={ <Recover /> } />
+              <Route path={ config.routes.registration.path } element={ <Register /> } />
+            </Routes>
+          </SessionProvider>
         </BrowserRouter>
-      </SessionProvider>
     </div>
   )
 }

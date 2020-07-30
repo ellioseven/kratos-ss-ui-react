@@ -17,6 +17,8 @@ browse 127.0.0.1:4455
   redirected to after a login or registration
 - Headers are not available to React, so only the cookie based security
   method is available
+- Session is set to expire at 24 hours, after that time, the user session will
+  be refreshed by redirecting them to the login screen
 
 ## @todo
 

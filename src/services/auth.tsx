@@ -37,10 +37,17 @@ export const useAuth = () => {
     window.location.href = `${base}/self-service/browser/flows/logout`
   }
 
+  const refresh = () => {
+    const base = config.kratos.browser
+    unsetAuthenticated()
+    window.location.href = `${base}/self-service/browser/flows/login?refresh=true&return_to=${config.baseUrl}/callback`
+  }
+
   return {
     login,
     register,
     logout,
+    refresh,
     isAuthenticated
   }
 }
