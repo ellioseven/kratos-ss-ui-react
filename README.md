@@ -5,9 +5,12 @@
 ```
 docker-compose run --rm kratos-ss-ui-react yarn install
 
-# NGINX proxy
+# Choose between NGINX or Oathkeeper reverse proxy:
+
+## NGINX
 docker-compose -f docker-compose.yml -f docker-compose-nginx.yml up -d
-# Oathkeeper proxy
+
+## OR: Oathkeeper
 docker-compose -f docker-compose.yml -f docker-compose-oathkeeper.yml up -d
 
 browse 127.0.0.1:4455
