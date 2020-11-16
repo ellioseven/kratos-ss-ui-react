@@ -4,13 +4,17 @@
 
 ```
 docker-compose run --rm kratos-ss-ui-react yarn install
-docker-compose up -d
+
+# NGINX proxy
+docker-compose -f docker-compose.yml -f docker-compose-nginx.yml up -d
+# Oathkeeper proxy
+docker-compose -f docker-compose.yml -f docker-compose-oathkeeper.yml up -d
+
 browse 127.0.0.1:4455
 ```
 
 ## Architecture Notes
 
-- For simplicity, NGINX is used instead of Oathkeeper
 - Browser checks for `isAuthenticated` flag in local storage before attempting
   to set authentication session, preventing multiple unnecessary API calls
 - `isAuthenticated` flag is set on the `callback` route, which the user is

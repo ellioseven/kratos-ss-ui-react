@@ -1,0 +1,15 @@
+version: "3.7"
+
+services:
+  nginx:
+    image: "nginx:mainline"
+    depends_on:
+      - kratos
+    ports:
+      - 4455:4455
+      - 4456:4456
+    restart: on-failure
+    networks:
+      - intranet
+    volumes:
+      - ./.nginx/nginx.conf:/etc/nginx/conf.d/default.conf
