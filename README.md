@@ -26,6 +26,8 @@ browse 127.0.0.1:4455
 
 ## @todo
 
+- Upgrade to Kratos 0.5.*
+- Implement custom profile fields
 - Implement error page
 - Implement configurable Kratos config
 - Investigate Kratos client bundle size
